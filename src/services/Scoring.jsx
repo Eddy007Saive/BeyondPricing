@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Configuration Airtable
-const AIRTABLE_BASE_ID ='appw6htDHCgbcl0c1';
+const AIRTABLE_BASE_ID =import.meta.env.VITE_APP_AIRTABLE_BASE_ID;
 const AIRTABLE_TABLE_NAME = 'Table_Scoring_Journalier'
 const AIRTABLE_API_KEY =
   import.meta.env.VITE_APP_AIRTABLE_API_KEY || "your_api_key";
