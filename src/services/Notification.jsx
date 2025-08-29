@@ -19,8 +19,7 @@ import { emitNotificationEvent } from '@/utils/NotificationProvider';
 
 // Fonction utilitaire pour déclencher les événements
 const triggerNotificationUpdate = () => {
-  // Déclencher un événement personnalisé pour mettre à jour le compteur
-  console.log("gfgvcvcv");
+
   
   emitNotificationEvent('notificationUpdated');
 };
@@ -89,7 +88,6 @@ export const getNotifications = async (params = {}) => {
       params: airtableParams
     });
 
-    console.log(response);
 
     // Transformer les données pour correspondre au format attendu
     const transformedRecords = response.data.records.map(record => ({

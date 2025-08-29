@@ -25,10 +25,7 @@ export function Dashboard() {
     <div className="min-h-screen bg-blue-gray-50/50">
       <Sidenav
         routes={routesWithNotifications}
-        brandImg={
-          sidenavType === "dark" ? "/img/logo-ct.png" : "/img/logo-ct-dark.png"
-        }
-        brandName="Prospectra"
+        brandName="Zéro Homme"
         unreadCount={unreadCount}
         isLoadingNotifications={isLoading}
         onNotificationClick={refreshCount}

@@ -12,13 +12,10 @@ export const NotificationProvider = ({ children }) => {
 
   // Fonction pour récupérer le compteur
 const fetchUnreadCount = useCallback(async () => {
-  console.log('[fetchUnreadCount] start');
   try {
     const response = await getUnreadNotificationsCount();
-    console.log('[fetchUnreadCount] response:', response);
     const newCount = response?.data?.count ?? 0;
     setUnreadCount(prev => {
-      console.log('[fetchUnreadCount] prev:', prev, 'new:', newCount);
       return prev !== newCount ? newCount : prev;
     });
   } catch (error) {
@@ -161,7 +158,6 @@ export const useWebSocketNotifications = (wsUrl) => {
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {
-        console.log('WebSocket connecté pour les notifications');
       };
 
       wsRef.current.onmessage = (event) => {
@@ -176,11 +172,9 @@ export const useWebSocketNotifications = (wsUrl) => {
       };
 
       wsRef.current.onerror = (error) => {
-        console.error('Erreur WebSocket:', error);
       };
 
       wsRef.current.onclose = () => {
-        console.log('WebSocket fermé');
         // Tentative de reconnexion après 5 secondes
         setTimeout(() => {
           if (wsRef.current?.readyState === WebSocket.CLOSED) {
@@ -216,7 +210,6 @@ export const useNotificationEvents = () => {
 
   const fetchUnreadCount = useCallback(async () => {
     try {
-        console.log("fetchUnreadCount called");
       setIsLoading(true);
       const response = await getUnreadNotificationsCount();
       setUnreadCount(response.data.count);
@@ -230,7 +223,6 @@ export const useNotificationEvents = () => {
 // ... dans NotificationProvider, après les autres useEffect
 useEffect(() => {
   const onUpdate = (e) => {
-    console.log('[Listener déclenché]', e.type);
     fetchUnreadCount();
   };
 
@@ -251,7 +243,6 @@ useEffect(() => {
 
 // Fonctions utilitaires pour déclencher les événements
 export const emitNotificationEvent = (eventType, detail = {}) => {
-  console.log('[emitNotificationEvent]', eventType, detail);
   const event = new CustomEvent(eventType, { detail });
   window.dispatchEvent(event);
 };

@@ -375,3 +375,170 @@ const mapFieldName = (fieldName) => {
 
   return fieldMapping[fieldName] || fieldName;
 };
+
+// Ajouter cette fonction dans le service scoring.js
+
+export const getScoringsByLogement = async (logementId, params = {}) => {
+  try {
+    const {
+      search = '',
+      dateFrom = '',
+      dateTo = '',
+      sortBy = 'Date',
+      sortOrder = 'ASC'
+    } = params;
+
+    // Construire les filtres Airtable
+    let filters = [];
+
+    // Filtre principal par logement (recherche dans les deux champs possibles)
+    filters.push(`OR(
+      {Id_logement} = "${logementId}",
+      FIND("${logementId}", ARRAYJOIN({ID Beds24 (from Id_logement)}))
+    )`);
+
+    // Filtre par recherche générale
+    if (search) {
+      filters.push(`OR(
+        SEARCH(LOWER("${search}"), LOWER({Justification})),
+        SEARCH(LOWER("${search}"), LOWER({strategie})),
+        SEARCH(LOWER("${search}"), LOWER({action})),
+        SEARCH(LOWER("${search}"), LOWER({Tension marché}))
+      )`);
+    }
+
+    // Filtre par plage de dates
+    if (dateFrom) {
+      filters.push(`{Date} >= "${dateFrom}"`);
+    }
+    if (dateTo) {
+      filters.push(`{Date} <= "${dateTo}"`);
+    }
+
+    let airtableParams = {
+      pageSize: 100,
+      view: "TriePardate",
+      fields: [
+        'Date',
+        'Prix moyen marché',
+        'Tension marché',
+        'Météo',
+        'Taux occupation marché',
+        'Événement',
+        'Tarif IA recommandé',
+        'Promo IA',
+        'Id_logement',
+        'MinPrice',
+        'ID Beds24 (from Id_logement)',
+        'Justification',
+        'week_end',
+        'facteurs_risque',
+        'action',
+        'Jours_ferie',
+        'impact_météo',
+        'confiance',
+        'strategie'
+      ],
+      filterByFormula: filters.length === 1 ? filters[0] : `AND(${filters.join(', ')})`
+    };
+
+    // Tri
+    if (sortBy && mapFieldName(sortBy)) {
+      const direction = sortOrder === 'DESC' ? 'desc' : 'asc';
+      airtableParams.sort = [{ field: mapFieldName(sortBy), direction }];
+    }
+
+    // Récupérer tous les enregistrements avec pagination
+    let allRecords = [];
+    let offset = '';
+
+    do {
+      if (offset) {
+        airtableParams.offset = offset;
+      }
+
+      console.log('Fetching with params:', airtableParams);
+      
+
+      const response = await airtableClient.get(`/${AIRTABLE_TABLE_NAME}`, {
+        params: airtableParams
+      });
+      console.log("data",response.data);
+      
+
+      allRecords = [...allRecords, ...response.data.records];
+      offset = response.data.offset;
+      delete airtableParams.offset;
+    } while (offset);
+
+    // Transformation des données
+    const transformedRecords = allRecords.map((record) => ({
+      id: record.id,
+      date: record.fields["Date"] || "",
+      prixMarche: record.fields["Prix moyen marché"] || 0,
+      tension: record.fields["Tension marché"] || "",
+      meteo: record.fields["Météo"] || "",
+      tauxOccupation: record.fields["Taux occupation marché"] || "",
+      evenement: record.fields["Événement"] || "",
+      tarifIA: record.fields["Tarif IA recommandé"] || 0,
+      promoIA: record.fields["Promo IA"] || "",
+      idLogement: record.fields["Id_logement"] || "",
+      minPrice: record.fields["MinPrice"] || 0,
+      idBeds24: record.fields["ID Beds24 (from Id_logement)"] || "",
+      justification: record.fields["Justification"] || "",
+      weekEnd: record.fields["week_end"] || "",
+      facteursRisque: record.fields["facteurs_risque"] || "",
+      action: record.fields["action"] || "",
+      joursFerie: record.fields["Jours_ferie"] || "",
+      impactMeteo: record.fields["impact_météo"] || "",
+      confiance: record.fields["confiance"] || "",
+      strategie: record.fields["strategie"] || "",
+    }));
+
+    console.log(`Scorings trouvés pour le logement ${logementId}:`, transformedRecords.length);
+
+    return {
+      data: {
+        scorings: transformedRecords,
+        totalItems: transformedRecords.length,
+        logementId: logementId
+      }
+    };
+  } catch (error) {
+    console.error('Erreur lors de la récupération des scorings par logement:', error);
+    throw error;
+  }
+};
+
+// Version encore plus optimisée avec cache
+let scoringCache = new Map();
+
+export const getScoringsByLogementCached = async (logementId, params = {}) => {
+  const cacheKey = `${logementId}-${JSON.stringify(params)}`;
+  
+  // Vérifier le cache (valide pendant 5 minutes)
+  if (scoringCache.has(cacheKey)) {
+    const cached = scoringCache.get(cacheKey);
+    const now = new Date().getTime();
+    if (now - cached.timestamp < 5 * 60 * 1000) { // 5 minutes
+      console.log('Données récupérées depuis le cache');
+      return cached.data;
+    }
+  }
+
+  // Récupérer les données
+  const result = await getScoringsByLogement(logementId, params);
+  
+  // Mettre en cache
+  scoringCache.set(cacheKey, {
+    data: result,
+    timestamp: new Date().getTime()
+  });
+
+  return result;
+};
+
+// Fonction pour nettoyer le cache
+export const clearScoringCache = () => {
+  scoringCache.clear();
+};

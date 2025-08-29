@@ -8,6 +8,7 @@ import {
   BellAlertIcon
 } from "@heroicons/react/24/solid";
 import { getUnreadNotificationsCount } from "@/services/Notification"; // Ajustez le chemin
+import { Calendar1Icon } from "lucide-react";
 
 // Configuration des icônes partagée
 const iconConfig = {
@@ -71,52 +72,16 @@ export const createRoutes = (unreadCount = 0, isLoadingNotifications = false) =>
     title: "Navigation principale",
     layout: "dashboard",
     pages: [
+
       {
-        icon: <HomeIcon {...iconConfig} />,
-        name: "Accueil",
-        path: "/home",
-        description: "Page d'accueil du dashboard"
-      },
-      {
-        icon: <MegaphoneIcon {...iconConfig} />,
-        name: "Campagnes",
-        path: "/campagne",
+        icon: <Calendar1Icon {...iconConfig} />,
+        name: "Calendrier",
+        path: "/calendrier",
         description: "Gestion des campagnes marketing"
-      },
-      {
-        icon: <UserGroupIcon {...iconConfig} />,
-        name: "Contacts",
-        path: "/contacts",
-        description: "Gestion des contacts"
       }
     ],
-  },
-  {
-    title: "Paramètres",
-    layout: "dashboard",
-    pages: [
-      {
-        icon: <GlobeAmericasIcon {...iconConfig} />,
-        name: "Configuration",
-        path: "/configuration",
-        description: "Configuration générale de l'application"
-      },
-      {
-        icon: <BookOpenIcon {...iconConfig} />,
-        name: "Aide",
-        path: "/guide",
-        description: "Documentation et aide"
-      },
-      {
-        icon: <BellAlertIcon {...iconConfig} />,
-        name: "Notifications",
-        path: "/notification",
-        description: "Gestion des notifications",
-        badge: <NotificationBadge count={unreadCount} isLoading={isLoadingNotifications} />,
-        hasUnreadNotifications: unreadCount > 0
-      },
-    ],
-  },
+  }
+ 
 ];
 
 // Routes statiques par défaut (sans badge)
