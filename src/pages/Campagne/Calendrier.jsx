@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 // Services
-import { getScoringsByLogement } from '@/services/scoring';
+import { getScoringsByLogement } from '@/services/Scoring';
 import { getLogements } from '@/services/Logement';
 
 export function Calendrier() {
