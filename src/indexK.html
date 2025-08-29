@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Streaming Webhook</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .progress-container {
+            background: #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        .step {
+            margin: 5px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Streaming Webhook n8n</h1>
+    
+    <div class="progress-container">
+        <h3>Progression de l'enrichissement</h3>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div id="statusText">Prêt à démarrer...</div>
+    </div>
+
+    <button id="startButton" onclick="startStreaming()">Démarrer l'enrichissement</button>
+    <button id="stopButton" onclick="stopStreaming()" disabled>Arrêter</button>
+
+    <div class="log" id="logContainer">
+        <div class="step">Logs du processus apparaîtront ici...</div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        const logContainer = document.getElementById('logContainer');
+        const progressFill = document.getElementById('progressFill');
+        const statusText = document.getElementById('statusText');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+
+        function startStreaming() {
+            // Remplacez cette URL par votre webhook n8n
+            const webhookUrl = 'https://n8n.srv903010.hstgr.cloud/webhook-test/stream';
+            
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            logContainer.innerHTML = '';
+            progressFill.style.width = '0%';
+            statusText.textContent = 'Connexion...';
+
+            // Utiliser Server-Sent Events pour le streaming
+            eventSource = new EventSource(webhookUrl);
+
+            eventSource.onopen = function(event) {
+                addLog('✅ Connexion établie', 'success');
+                statusText.textContent = 'Connecté - En attente...';
+            };
+
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    // Mettre à jour la progression
+                    progressFill.style.width = data.progress + '%';
+                    statusText.textContent = data.message;
+                    
+                    // Ajouter au log
+                    addLog(`[${data.step}/10] ${data.message} (${data.progress}%)`, 'info');
+                    
+                    // Si terminé
+                    if (data.isComplete) {
+                        addLog('🎉 Enrichissement terminé !', 'success');
+                        stopStreaming();
+                    }
+                } catch (e) {
+                    addLog('❌ Erreur parsing: ' + event.data, 'error');
+                }
+            };
+
+            eventSource.onerror = function(event) {
+                addLog('❌ Erreur de connexion', 'error');
+                statusText.textContent = 'Erreur de connexion';
+                stopStreaming();
+            };
+        }
+
+        function stopStreaming() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            statusText.textContent = 'Arrêté';
+            addLog('🔴 Connexion fermée', 'warning');
+        }
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'step';
+            
+            let color = '#0f0';
+            if (type === 'error') color = '#f44336';
+            if (type === 'warning') color = '#ff9800';
+            if (type === 'success') color = '#4CAF50';
+            
+            logEntry.innerHTML = `<span style="color: #888">[${timestamp}]</span> <span style="color: ${color}">${message}</span>`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Alternative avec fetch() pour les webhooks normaux
+        async function startStreamingFetch() {
+            const webhookUrl = 'https://n8n.srv903010.hstgr.cloud/webhook-test/stream';
+            
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        campaignId: 'test-123',
+                        contacts: ['contact1', 'contact2', 'contact3'] 
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    addLog('📦 Chunk reçu: ' + chunk, 'info');
+                }
+
+            } catch (error) {
+                addLog('❌ Erreur: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
