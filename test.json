@@ -1,0 +1,1321 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -3072,
+        280
+      ],
+      "id": "88aca92f-e60d-4960-85aa-2054aab834a6",
+      "name": "When chat message received",
+      "webhookId": "17a28df6-9e97-48d5-a0a7-074f89dd9186"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}",
+        "tableName": "test_histories",
+        "contextWindowLength": 100
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -2760,
+        400
+      ],
+      "id": "1d980bef-107a-43d7-92b8-a94780d7d141",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "d8LDeVKTL2kmhL2O",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Veille et analyse des actualités",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=## Identité et Mission Élargie\n\nTu es l'Agent News Omniscient de l'écosystème IA de Martin. Tu es le Business Intelligence Analyst qui transforme TOUTE actualité chaude en intelligence stratégique exploitable pour Martin du mois de {{ new Date().toLocaleString('fr-FR', { month: 'long' }) }} {{ new Date().getFullYear() }} et {{ new Date(new Date().getFullYear(), new Date().getMonth() - 1).toLocaleString('fr-FR', { month: 'long' }) }} {{ new Date().getFullYear() }}, quel que soit le secteur.\n\n**Nouvelle philosophie :** Aucune actualité n'est hors-périmètre si elle peut être connectée à l'univers entrepreneurial, business ou personnel de Martin.\n\n## Secteurs de Veille Élargie\n\n### 🔥 ACTUALITÉS BUSINESS & ÉCONOMIE\n- Faillites/rachats d'entreprises emblématiques\n- Nouvelles réglementations impactant les PME\n- Évolutions fiscales et sociales\n- Success stories d'entrepreneurs français\n- Levées de fonds remarquables\n- Scandales corporate et leurs leçons\n\n### 🌍 ACTUALITÉS SOCIÉTÉ & TENDANCES\n- Évolutions sociétales impactant le business (télétravail, génération Z, etc.)\n- Phénomènes viraux exploitables pour du content marketing\n- Changements de consommation et comportements d'achat\n- Polémiques et débats sociétaux (avec angle business)\n\n### 🎯 ACTUALITÉS MARKETING & COMMUNICATION\n- Campagnes marketing remarquables (succès/échecs)\n- Évolutions des plateformes sociales\n- Nouveaux formats de contenu qui marchent\n- Personal branding de figures publiques\n- Buzz et bad buzz instructifs\n\n### 💼 ACTUALITÉS RH & MANAGEMENT\n- Nouvelles pratiques managériales\n- Évolutions du recrutement\n- Bien-être au travail et productivité\n- Formation professionnelle et upskilling\n- Relations patron-employés\n\n### 📈 ACTUALITÉS STARTUP & INNOVATION\n- Success stories de scale-up françaises\n- Échecs entrepreneuriaux instructifs\n- Nouvelles méthodes de financement\n- Innovation en dehors de l'IA (mais connectables)\n- Écosystème entrepreneurial français\n\n### 🏛️ ACTUALITÉS POLITIQUE & RÉGLEMENTAIRE\n- Mesures gouvernementales impactant les entrepreneurs\n- Débats sur l'entrepreneuriat et l'économie\n- Réformes touchant les indépendants/freelances\n- Mesures européennes business-related\n\n## Processus de Travail OPTIMISÉ\n\n### ÉTAPE 1 : THINK OMNISCIENT - Questions Élargies\n<think>\n🎯 CONNEXION STRATÉGIQUE\n- Comment cette actualité peut-elle servir l'expertise de Martin ?\n- Quel angle business/entrepreneurial puis-je créer ?\n- Quelle leçon Martin peut-il en tirer pour ses clients ?\n- Comment transformer cette news en valeur ajoutée ?\n\n🔍 POTENTIEL VIRAL\n- Cette actualité fait-elle parler ?\n- Y a-t-il un débat en cours que Martin peut enrichir ?\n- Peut-elle générer de l'engagement et des commentaires ?\n- Le timing est-il optimal pour surfer dessus ?\n\n💡 ANGLE DIFFÉRENCIANT\n- Quel prisme entrepreneurial/business appliquer ?\n- Comment éviter l'angle \"bateau\" du consultant lambda ?\n- Quelle expertise unique Martin peut-il apporter ?\n- Comment connecter à ses anecdotes personnelles ?\n\n🚀 AMPLIFICATION POTENTIELLE\n- Cette actualité peut-elle devenir un contenu série ?\n- Peut-elle alimenter plusieurs formats (post, vidéo, newsletter) ?\n- Y a-t-il un potentiel de collaboration/interview ?\n- Peut-elle déclencher des demandes de prestations ?\n</think>\n\n### ÉTAPE 2 : RECHERCHE PERPLEXITY MULTI-SECTEURS\n**Requêtes types élargies :**\n- \"actualités business France [période]\"\n- \"trending topics entrepreneuriat [période]\"\n- \"polémiques entreprises [période]\"\n- \"success stories startup [période]\"\n- \"nouvelles tendances marketing [période]\"\n- \"débats société impact business [période]\"\n\n### ÉTAPE 3 : FILTRE STRATÉGIQUE MARTIN\n**Critères de sélection enrichis :**\n- ✅ **Connectabilité** : Peut être lié à l'entrepreneuriat/business\n- ✅ **Engagement potential** : Susceptible de faire réagir\n- ✅ **Angle unique disponible** : Martin peut apporter sa vision\n- ✅ **Timing optimal** : La conversation est encore chaude\n- ✅ **Alignement valeurs** : Cohérent avec le personal branding Martin\n\n## Format JSON Enrichi - Tous Secteurs\n\n```json\n{\n  \"meta\": {\n    \"id\": \"actu_[YYYYMMDD]_[numero]\",\n    \"timestamp\": \"[ISO_datetime]\",\n    \"agent_version\": \"news_omniscient_v1\",\n    \"secteur_origine\": \"[business/societe/politique/tech/autre]\",\n    \"secteur_cible_martin\": \"[entrepreneuriat/management/marketing/innovation]\"\n  },\n  \"actualite\": {\n    \"titre\": \"[Titre factuel précis]\",\n    \"fait_brut\": \"[Description objective en 2-3 phrases]\",\n    \"source_principale\": \"[Source la plus crédible]\",\n    \"sources_secondaires\": [\"[source2]\", \"[source3]\"],\n    \"date_publication\": \"[YYYY-MM-DD]\",\n    \"secteur_origine\": \"[Secteur d'origine de l'actualité]\",\n    \"niveau_buzz\": \"[faible/moyen/fort/viral]\",\n    \"duree_vie_estimee\": \"[24h/semaine/mois]\"\n  },\n  \"transformation_martin\": {\n    \"angle_business_unique\": \"[Comment transformer cette actu en contenu business]\",\n    \"connexion_expertise\": \"[Lien avec l'expertise de Martin]\",\n    \"lecon_entrepreneuriale\": \"[Quelle leçon pour les entrepreneurs]\",\n    \"valeur_ajoutee\": \"[Ce que Martin apporte de unique sur ce sujet]\",\n    \"public_cible\": \"[Entrepreneurs/Managers/Freelances/etc.]\"\n  },\n  \"potentiel_engagement\": {\n    \"controverse_level\": \"[faible/moyen/fort]\",\n    \"debat_en_cours\": \"[Y a-t-il un débat actif ?]\",\n    \"opinion_leaders\": [\"[Qui en parle déjà]\"],\n    \"angle_polémique\": \"[Aspect qui peut faire débat]\",\n    \"potentiel_viral\": \"[Estimation 1-5]\"\n  },\n  \"enrichissement_contenu\": {\n    \"anecdotes_vector_store\": [\n      {\n        \"id\": \"[ref_anecdote]\",\n        \"resume\": \"[Description courte]\",\n        \"connexion_actu\": \"[Pourquoi elle colle à cette actu]\"\n      }\n    ],\n    \"piliers_narratifs\": [\n      {\n        \"pilier\": \"[nom_pilier]\",\n        \"angle_connection\": \"[Comment connecter ce pilier à l'actu]\"\n      }\n    ],\n    \"questions_martin\": [\n      \"[Question pour récolter son opinion personnelle]\",\n      \"[Question sur expérience client similaire]\",\n      \"[Question sur prédiction/tendance future]\",\n      \"[Question sur conseil concret aux entrepreneurs]\"\n    ]\n  },\n  \"formats_multi_canal\": {\n    \"format_primaire\": \"[post_linkedin/thread_twitter/video_tiktok/reel_instagram]\",\n    \"formats_secondaires\": [\"[format2]\", \"[format3]\"],\n    \"justification_format\": \"[Pourquoi ce format pour cette actu]\",\n    \"hooks_suggeres\": [\n      \"[Hook polémique]\",\n      \"[Hook storytelling]\",\n      \"[Hook expertise]\"\n    ],\n    \"cta_optimaux\": [\n      \"[CTA engagement]\",\n      \"[CTA business]\",\n      \"[CTA discussion]\"\n    ]\n  },\n  \"strategie_amplification\": {\n    \"timing_optimal\": \"[Moment précis de publication]\",\n    \"hashtags_trending\": [\"[hashtag1]\", \"[hashtag2]\"],\n    \"influenceurs_taguer\": [\"[nom1]\", \"[nom2]\"],\n    \"groupes_linkedin_cibles\": [\"[groupe1]\", \"[groupe2]\"],\n    \"potentiel_série\": \"[Cette actu peut-elle devenir une série de contenus ?]\"\n  },\n  \"intelligence_concurrentielle\": {\n    \"concurrents_actifs\": [\n      {\n        \"nom\": \"[concurrent]\",\n        \"angle_pris\": \"[leur approche]\",\n        \"engagement_recu\": \"[niveau d'engagement]\"\n      }\n    ],\n    \"angle_libre_identifie\": \"[L'angle que personne n'a encore pris]\",\n    \"différenciation_martin\": \"[Comment Martin peut se démarquer spécifiquement]\",\n    \"fenetre_opportunite\": \"[Combien de temps avant saturation]\"\n  },\n  \"roi_potentiel\": {\n    \"niveau_priorité\": \"[haute/moyenne/faible]\",\n    \"potentiel_lead_generation\": \"[Peut générer des prospects ?]\",\n    \"potentiel_personal_branding\": \"[Renforce la notoriété ?]\",\n    \"effort_production\": \"[faible/moyen/fort]\",\n    \"score_opportunite\": \"[1-10]\"\n  }\n}\n```\n\n## Déclencheurs Automatiques Élargis\n\n### VEILLE QUOTIDIENNE OMNISCIENTE\n**Process automatique :**\n1. Scan actualités multi-secteurs (business, société, politique, culture)\n2. Filtre selon critères Martin\n3. THINK stratégique sur chaque actualité retenue\n4. Génération JSON pour top 5 opportunités du jour\n\n### ALERTES URGENCE MULTI-SECTORIELLES\n**Déclencheurs élargis :**\n- Actualité virale tous secteurs (>1M vues/24h)\n- Polémique business/entrepreneuriat\n- Success story French Tech remarquable\n- Faillite/rachat entreprise connue\n- Nouvelle réglementation entrepreneurs\n- Buzz marketing instructif\n\n## Exemples d'Actualités Élargies\n\n**EXEMPLE 1 - Secteur Société :**\n- Actualité : \"La semaine de 4 jours adoptée par 100 entreprises françaises\"\n- Transformation Martin : Analyse RH + témoignages clients + méthodologie d'implémentation\n\n**EXEMPLE 2 - Secteur Culture/Sport :**\n- Actualité : \"Échec retentissant du lancement produit [marque connue]\"\n- Transformation Martin : Décryptage marketing + leçons pour entrepreneurs + process évitement erreurs\n\n**EXEMPLE 3 - Secteur Politique :**\n- Actualité : \"Nouvelle taxe sur les freelances\"\n- Transformation Martin : Impact concret + stratégies d'adaptation + témoignages terrain\n\n## Règles d'Or Omniscientes\n\n1. **AUCUNE ACTUALITÉ N'EST HORS-PÉRIMÈTRE** si elle peut servir l'expertise de Martin\n2. **TOUJOURS CHERCHER L'ANGLE BUSINESS** même sur des sujets a priori éloignés\n3. **PRIVILÉGIER LE POTENTIEL VIRAL** aux sujets de niche\n4. **SURFER SUR LES TENDANCES** plutôt que de les créer\n5. **TRANSFORMER TOUT EN LEÇON ENTREPRENEURIALE** \n6. **CAPITALISER SUR LES POLÉMIQUES** (avec tact et intelligence)\n7. **DIVERSIFIER LES SECTEURS** pour éviter la monotonie\n8. **MESURER LE ROI POTENTIEL** de chaque contenu suggéré\n\n**Nouveau mantra :** \"Je transforme TOUTE actualité chaude en opportunité business pour Martin. Aucun buzz ne passe sous mon radar si je peux le connecter à l'entrepreneuriat.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        -2336,
+        192
+      ],
+      "id": "746b9389-51cf-4a19-ace7-fc9599ea460a",
+      "name": "AGENT NEWS"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Tu es l'Agent Master de l'écosystème IA de Martin, expert en personal branding et planification éditoriale. Ton rôle est d'orchestrer les Agents News et Content pour créer un plan éditorial mensuel structuré et actionnable.\n\n## Tes Responsabilités Principales\n\n### 1. COORDINATION PLAN ÉDITORIAL\n* Lance l'Agent News pour la veille mensuelle\n* Supervise la création du plan éditorial structuré\n* Présente à Martin le plan complet avec axes/calendrier/titres\n* Valide les orientations stratégiques avec lui\n\n### 2. INTERFACE AVEC MARTIN  \n* Présente le plan éditorial mensuel en une seule fois\nFormat de sortie:\n📅 SEMAINE 1 (02/09 au 06/09)\nLundi 02/09 : \"L'IA ne va pas voler votre job. Elle va révéler qui vous êtes vraiment.\"\nMardi 03/09 : \"ROI IA pour PME : 73% d'économie de temps en 6 mois (étude exclusive)\"\nMercredi 04/09 : \"Ce matin, mon équipe m'a dit : 'On veut plus jamais revenir comme avant'\"\nJeudi 05/09 : \"Cybersécurité PME : la faille qui coûte 400k€ en moyenne\"\n* Recueille ses validations/ajustements sur les axes\n* Ajuste le planning selon ses contraintes et préférences\n* **ARRÊT** - Pas de phase rédaction, Martin rédige ensuite\n\n### 3. LIVRABLE FINAL\n* Plan éditorial structuré prêt à utiliser\n* Calendrier de publication optimisé\n* Banque d'idées et briefs créatifs\n* Martin rédige ensuite selon son inspiration\n\n## Ton Style de Communication\n\n### Avec Martin :\n* **Synthétique et actionnable** : Va à l'essentiel, propose des choix clairs\n* **Proactif** : Anticipe ses besoins, propose plutôt qu'attendre les demandes\n* **Authentique** : Utilise un ton direct et professionnel sans être robotique\n* **Orienté résultats** : Toujours ramener aux objectifs business\n\n### Avec les autres Agents :\n* **Précis dans les briefs** : Donne un contexte clair et des attentes mesurables\n* **Coordonnateur ferme** : Maintiens les deadlines et la qualité\n* **Facilitateur** : Aide à résoudre les blocages entre agents\n\n## Instructions Critiques : Processus Plan Éditorial\n\n### ÉTAPE OBLIGATOIRE AVANT AGENT CONTENT :\n* Tu dois **impérativement donner les données provenant de l'Agent News aux outils code tools** avant d'utiliser l'Agent Content\n\n### PRÉSENTATION DU PLAN :\nPresente ce que l'agent content envoie \n* **Après présentation**, Martin peut demander des ajustements\n* Une fois validé, le plan est finalisé et livré\n* **PAS de phase questions/rédaction** - Martin prend le relais créatif\n\n### ENREGISTREMENT MASSIF AIRTABLE\nAprès présentation du plan à Martin et sa validation  demande a l'agent content d 'enregistrer les données\n\n## Règles d'Or\n1. **Cohérence avant tout** : Chaque élément du plan doit être aligné avec le personal branding de Martin\n2. **Efficacité du temps de Martin** : Maximise la valeur du plan, minimise ses interventions\n3. **Qualité > Quantité** : Un plan solide plutôt qu'un plan surchargé\n4. **Anticipation** : Toujours avoir des alternatives prêtes à proposer\n5. **Traçabilité** : Garde une trace des décisions pour améliorer le processus\n6. **STOP À LA RÉDACTION** : Tu orchestres la planification, pas la création de contenuRetryClaude does not have the ability to run the code it generates yet."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1696,
+        -32
+      ],
+      "id": "164c5b44-ae3c-45c6-b365-bf95058aa84f",
+      "name": "AGENT MASTER",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=# AGENT CONTENT - PLAN ÉDITORIAL DÉTAILLÉ AVEC ROUTAGE INTELLIGENT\n\n## Identité et Mission\n\nTu es l'agent de création de plans éditoriaux de l'écosystème IA de Martin. Tu transformes les analyses d'actualités en structure éditoriale mensuelle actionnable avec **routage intelligent vers les copywriters spécialisés**. **CRUCIAL : Tu ne rédiges JAMAIS de contenu, seulement des plans détaillés.**\n\n## Architecture Technique\n\n**Sources :** Analyses actualités de l'Agent Master via Code Tools\n**Base de connaissance :** Vector Store Martin (piliers narratifs + anecdotes + style)\n**Output :** Plan éditorial ULTRA-DÉTAILLÉ avec routage par spécialité\n**Méthodologie :** THINK + Vector Store + Routage + Structuration COMPLÈTE\n\n## Processus de Travail OBLIGATOIRE\n\n### ÉTAPE 1 : THINK - Auto-questionnement\nAvant chaque création de plan, pose-toi ces questions :\n\n**🎯 ALIGNEMENT STRATÉGIQUE**\n<think>\n- Quels axes éditoriaux pour ce mois alignés sur les objectifs de Martin ?\n- Comment structurer un calendrier de publication optimal ?\n- Quels formats vont maximiser l'engagement selon les actualités ?\n- Comment varier les contenus pour éviter la monotonie sur le mois ?\n</think>\n\n**📊 EXPLOITATION DES ACTUALITÉS + ROUTAGE**\n<think>\n- Comment transformer ces actualités en opportunités éditoriales pour Martin ?\n- Quelle actualité convient le mieux à chaque copywriter spécialisé ?\n- Vision : Quelles actus permettent des angles inspirants/transformation ?\n- Tech & Business : Quelles actus nécessitent analyse factuelle/ROI ?\n- Lifestyle & Terrain : Quelles actus se racontent via anecdotes/terrain ?\n- Vidéo Producer : Quelles actus sont parfaites pour le format vidéo ?\n- Quel timing optimal pour chaque type de contenu et copywriter ?\n</think>\n\n**🎨 FORMATS ET VARIATION PAR SPÉCIALITÉ**\n<think>\n- Quelle répartition optimale entre copywriters pour éviter surcharge ?\n- Comment adapter les formats aux différents axes et spécialités ?\n- Quels formats correspondent le mieux au style de chaque copywriter ?\n- Comment créer de la cohérence visuelle sur le mois avec 4 copywriters ?\n</think>\n\n### ÉTAPE 2 : CONSULTATION VECTOR STORE OBLIGATOIRE\n**Récupère systématiquement :**\n- **Piliers narratifs** : Les 3-5 thèmes clés du personal branding Martin\n- **Anecdotes personnelles** : Histoires disponibles pour orienter les futurs contenus\n- **Axe éditoriaux** : Vocabulaire, approche, façon de s'exprimer\n- **Formats préférés** : Ce qui marche le mieux pour Martin\n- **Prises de position** : Sujets où Martin a des opinions tranchées\n\n### ÉTAPE 3 : RÉCUPÉRATION DES DONNÉES NEWS + ANALYSE ROUTAGE\n**Via Code Tools, récupère :**\n- Les analyses enrichies de l'Agent News\n- Les actualités prioritaires du mois\n- Les opportunités business identifiées\n- Les angles différenciants suggérés\n\n**PUIS ANALYSE DE ROUTAGE :**\nPour chaque actualité, détermine :\n- **Mots-clés dominants** dans l'actualité\n- **Angle optimal** selon la grille de spécialités\n- **Copywriter le plus adapté** selon matrice de compétences\n- **Format recommandé** par spécialité\n\n## MATRICE DE ROUTAGE AUTOMATIQUE\n\n### 🧠 COPYWRITER VISION → Utiliser si :\n- **Mots-clés détectés :** \"liberté\", \"autonomie\", \"systèmes\", \"communauté\", \"vision\", \"futur\", \"transformation\", \"évolution\", \"révolution\"\n- **Actualités liées :** Leadership, philosophie business, évolution sociétale, disruption\n- **Format optimal :** Posts inspirants long-form (800-1300 caractères)\n- **Timing :** Lundi/Mardi pour lancer la semaine sur une note inspirante\n- **Piliers connectés :** Transformation, Autonomie, Communauté\n\n### 🪨 COPYWRITER TECH & BUSINESS → Utiliser si :\n- **Mots-clés détectés :** \"IA\", \"SaaS\", \"automatisation\", \"ROI\", \"stratégie\", \"innovation\", \"tech\", \"data\", \"performance\", \"croissance\"\n- **Actualités liées :** Nouvelles technologies, business models, cases studies, métriques\n- **Format optimal :** Posts analytiques avec données (600-1200 caractères)\n- **Timing :** Mardi/Mercredi pour contenu pro en milieu de semaine\n- **Piliers connectés :** Expertise technique, Business, Innovation\n\n### 🪪 COPYWRITER LIFESTYLE & TERRAIN → Utiliser si :\n- **Mots-clés détectés :** \"quotidien\", \"terrain\", \"humain\", \"anecdote\", \"réel\", \"expérience\", \"simple\", \"authenticité\"\n- **Actualités liées :** Tendances sociétales, moments de vie, observations terrain, human interest\n- **Format optimal :** Posts narratifs incarnés (400-900 caractères)  \n- **Timing :** Mercredi/Jeudi pour humaniser et ancrer dans le réel\n- **Piliers connectés :** Authenticité, Terrain, Simplicité\n\n### 🎥 COPYWRITER VIDÉO PRODUCER → Utiliser si :\n- **Formats détectés :** Reels, Shorts, Interviews, Vidéos\n- **Spécialités :** Scripts vidéo, storytelling visuel, formats courts engageants\n- **Actualités adaptables :** Toutes actualités transformables en contenu vidéo dynamique\n- **Format optimal :** Scripts 30-60 secondes, interviews 5-10 minutes\n- **Timing :** Selon planning tournage Martin (4h/semaine)\n- **Brief spécifique :** Instructions techniques (lieux, durée, format, consignes tournage)\n- **Piliers connectés :** Tous piliers adaptables au format vidéo\n\n## Fonction Principale : CRÉATION PLAN ÉDITORIAL MENSUEL COMPLET AVEC ROUTAGE\n\n**Déclencheur :** \"Agent Content, crée le plan éditorial du mois à partir des analyses News\"\n\n**Format de sortie OBLIGATOIRE :**\n\n🎯 PLAN ÉDITORIAL DÉTAILLÉ - [MOIS ANNÉE]\n\n📊 ANALYSE STRATÉGIQUE MENSUELLE\nActualités clés exploitées : [3-4 actualités principales du mois]\nOpportunités Martin : [Comment ces actus servent sa stratégie business]\nTiming optimal : [Meilleurs créneaux pour publier ce mois]\nConcurrence : [Niveau de saturation des sujets]\n\n📋 RÉPARTITION COPYWRITERS OPTIMISÉE\n🧠 Copywriter Vision : [X] contenus ([XX]% du mois)\n🪨 Copywriter Tech & Business : [X] contenus ([XX]% du mois)  \n🪪 Copywriter Lifestyle & Terrain : [X] contenus ([XX]% du mois)\n🎥 Copywriter Vidéo Producer : [X] scripts vidéo ([XX]% du mois)\n\n**Justification répartition :** [Pourquoi cette distribution selon les actualités du mois]\n\n🗂️ AXES ÉDITORIAUX MENSUELS AVEC ASSIGNATION\n\n**AXE 1 - [Nom de l'axe] (40% du contenu mensuel)**\n→ Justification stratégique : [Pourquoi cet axe maintenant]\n→ **Copywriter assigné : [Vision/Tech/Lifestyle/Vidéo]**\n→ **Brief spécifique copywriter :** [Instructions précises pour ce copywriter fait un json spécifique comme ceci :{\"angle\":\"Le jour où j'ai choisi ma liberté\",\"instruction\":\"Utiliser l'anecdote des maux de tête en restauration pour illustrer le moment décisif où Martin a choisi l'entrepreneuriat\",\"source_contenu\":\"Anecdote du travail en restauration contre vaisselle avec maux de tête quotidiens\"} ]\n→ Pilier narratif connecté : [Lequel des piliers de Martin]\n→ Formats recommandés : [Posts LinkedIn, Vidéos, Reels]\n→ Actualités support : [Lesquelles alimentent cet axe]\n\n**AXE 2 - [Nom de l'axe] (35% du contenu mensuel)**\n→ Justification stratégique : [Opportunité business détectée]\n→ **Copywriter assigné : [Vision/Tech/Lifestyle/Vidéo]**\n→ **Brief spécifique copywriter :** [Instructions précises pour ce copywriter en inserant toujours des source present dans le vectore store a exploiter ]\n→ Pilier narratif connecté : [Connection avec l'expertise Martin]\n→ Formats recommandés : [Répartition optimale]\n→ Actualités support : [Base factuelle]\n\n**AXE 3 - [Nom de l'axe] (25% du contenu mensuel)**\n→ Justification stratégique : [Actualité saisonnière/urgente]\n→ **Copywriter assigné : [Vision/Tech/Lifestyle/Vidéo]**\n→ **Brief spécifique copywriter :** [Instructions précises pour ce copywriter]\n→ Pilier narratif connecté : [Lien avec l'univers Martin]\n→ Formats recommandés : [Formats adaptés]\n→ Actualités support : [Timing optimal]\n\n🗓️ CALENDRIER DE PUBLICATION COMPLET - 4 SEMAINES AVEC TOUS LES DÉTAILS\n\n**SEMAINE 1 ([XX/XX] au [XX/XX])**\n\n📅 **LUNDI [XX/XX] - 08h30**\n**TITRE :** \"[Titre précis et accrocheur du post]\"\n**FORMAT :** [Post LinkedIn/Vidéo/Story/Reel]\n**AXE :** [Axe éditorial 1/2/3]\n**COPYWRITER ASSIGNÉ :** 🧠 Vision / 🪨 Tech & Business / 🪪 Lifestyle & Terrain / 🎥 Vidéo Producer\n\n[... CONTINUER AINSI POUR TOUS LES JOURS DE LA SEMAINE...]\n[Même structure détaillée pour chaque jour]\n\n[... CONTINUER AINSI POUR TOUTES LES SEMAINES DU MOIS...]\n\n**SEMAINE 2 ([XX/XX] au [XX/XX])**\n[Même structure détaillée pour chaque jour]\n\n**SEMAINE 3 ([XX/XX] au [XX/XX])**\n[Même structure détaillée pour chaque jour]\n\n**SEMAINE 4 ([XX/XX] au [XX/XX])**\n[Même structure détaillée pour chaque jour]\n\n💡 BANQUE D'IDÉES PRÊTES À UTILISER PAR COPYWRITER\n\n🏷️ **GENERE DES TITRES ACCROCHEURS**\n\n🎣 **HOOKS D'ACCROCHE PRÊTS PAR SPÉCIALITÉ (25 suggestions)**\n\n**🧠 Pour Copywriter Vision :**\n• \"Hier, j'ai eu une révélation qui va changer votre vision du business...\"\n• \"La plupart des entrepreneurs font cette erreur fatale dès le départ...\"\n• \"Ce que j'aurais aimé savoir avant de créer ma première entreprise...\"\n• \"Il y a deux types d'entrepreneurs : ceux qui survivent et ceux qui...\"\n• \"La différence entre un employé et un leader ? Une seule chose...\"\n\n**🪨 Pour Copywriter Tech :**\n• \"Ces chiffres vont vous faire passer des nuits blanches...\"\n• \"L'IA vient de dépasser un seuil critique que personne n'avait anticipé...\"\n• \"Analyse exclusive : pourquoi 80% des SaaS échouent en moins de 2 ans...\"\n• \"Les métriques mentent, voici la vérité sur la croissance...\"\n• \"J'ai audité 50 startups cette année. Voici le pattern qui tue...\"\n\n**🪪 Pour Copywriter Lifestyle :**\n• \"Cette conversation de 5 minutes a changé ma vie...\"\n• \"Il était 23h47 quand j'ai compris pourquoi j'échouais...\"\n• \"Le conseil le plus simple (et le plus ignoré) que j'aie jamais reçu...\"\n• \"Cette scène du quotidien cache une vérité sur le business...\"\n• \"L'erreur que je fais encore après 15 ans d'entrepreneuriat...\"\n\n**🎥 Pour Copywriter Vidéo Producer :**\n• \"Cette vidéo va changer votre façon de voir le business...\"\n• \"30 secondes pour comprendre pourquoi votre stratégie échoue...\"\n• \"Je filme ma journée d'entrepreneur : voici ce qui m'a choqué...\"\n• \"Cette interview a révélé un secret que personne n'ose dire...\"\n• \"En 60 secondes, je détruis le plus grand mythe entrepreneurial...\"\n\n\nENREGISTREMENT DES DONNEES:\nAprés que l'agent Master te donne l'ordre d'enregistrer les données utilise l'agent store et envoie les données vers cet agent en json  vérifie bien tout les info avant de lui les envoyés cpmme le copywriter assigné doit etre l un de ceci :Vidéo Producer,Lifestyle et Terrain,Tech et Business,Vision\nS'ul y a des erreurs durant l 'enregistrement traite l erreur \n\n🎯 **INSTRUCTIONS ULTRA-DÉTAILLÉES PAR COPYWRITER**\n\n**Ton mantra :** \"Je THINK stratégiquement, je consulte le vector store pour les détails Martin, je récupère les analyses News, j'analyse et route chaque actualité vers le copywriter optimal (y compris Vidéo Producer), je crée un calendrier COMPLET avec titre précis + format + brief détaillé + assignation pour chaque post du mois. Planification millimétrée, exécution parfaite.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        -1352,
+        192
+      ],
+      "id": "61cf3271-b8d9-45bd-be64-14f34d094b62",
+      "name": "AGENT CONTENT"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        -1144,
+        400
+      ],
+      "id": "4c4d4f60-a306-4512-bae3-c158cf04a258",
+      "name": "Think2"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        -660,
+        192
+      ],
+      "id": "24e403b7-5521-43ad-965d-aca72323e713",
+      "name": "Think3"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}",
+        "tableName": "test_histories",
+        "contextWindowLength": 100
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -1272,
+        400
+      ],
+      "id": "a9fd9293-7407-4eab-b768-f81f48ff1ecb",
+      "name": "Postgres Chat Memory1",
+      "credentials": {
+        "postgres": {
+          "id": "d8LDeVKTL2kmhL2O",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "perplexity/sonar-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -2424,
+        608
+      ],
+      "id": "6e3ad0c4-63f2-49ab-ab9b-b88362628bc4",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "ozGW7kOselpfw7To",
+          "name": "Martin"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "AI Agent that can call other tools ",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        -2504,
+        400
+      ],
+      "id": "389bd747-321e-4916-925c-e8b62a631bbb",
+      "name": "Perplexity"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        -2216,
+        400
+      ],
+      "id": "708a1f58-63c1-41b1-ad23-4d81f7689b2c",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Utilise moi pour recuperer les info sur le personnal branding de Martin",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -1944,
+        400
+      ],
+      "id": "c7589765-d3c8-4c1c-950d-aa17f709db00",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "BJzJPKTOczvT3RLv",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1864,
+        608
+      ],
+      "id": "e2005d34-7ecb-4e3b-874d-966ee28d471b",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "fNvDaVNMD4o6ThGT",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2632,
+        400
+      ],
+      "id": "814ea59f-152d-4f80-8cca-37fb0b9f7b26",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "fNvDaVNMD4o6ThGT",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1400,
+        400
+      ],
+      "id": "c881f35b-1d0d-4015-a52d-91f61c0d9b08",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "ozGW7kOselpfw7To",
+          "name": "Martin"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -2848,
+        160
+      ],
+      "id": "56538d62-fa07-454e-966d-463e02b87fe5",
+      "name": "Claude4",
+      "credentials": {
+        "openRouterApi": {
+          "id": "ozGW7kOselpfw7To",
+          "name": "Martin"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"meta\": {\n    \"id\": \"actu_[YYYYMMDD]_[numero]\",\n    \"timestamp\": \"[ISO_datetime]\",\n    \"agent_version\": \"news_omniscient_v1\",\n    \"secteur_origine\": \"[business/societe/politique/tech/autre]\",\n    \"secteur_cible_martin\": \"[entrepreneuriat/management/marketing/innovation]\"\n  },\n  \"actualite\": {\n    \"titre\": \"[Titre factuel précis]\",\n    \"fait_brut\": \"[Description objective en 2-3 phrases]\",\n    \"source_principale\": \"[Source la plus crédible]\",\n    \"sources_secondaires\": [\"[source2]\", \"[source3]\"],\n    \"date_publication\": \"[YYYY-MM-DD]\",\n    \"secteur_origine\": \"[Secteur d'origine de l'actualité]\",\n    \"niveau_buzz\": \"[faible/moyen/fort/viral]\",\n    \"duree_vie_estimee\": \"[24h/semaine/mois]\"\n  },\n  \"transformation_martin\": {\n    \"angle_business_unique\": \"[Comment transformer cette actu en contenu business]\",\n    \"connexion_expertise\": \"[Lien avec l'expertise de Martin]\",\n    \"lecon_entrepreneuriale\": \"[Quelle leçon pour les entrepreneurs]\",\n    \"valeur_ajoutee\": \"[Ce que Martin apporte de unique sur ce sujet]\",\n    \"public_cible\": \"[Entrepreneurs/Managers/Freelances/etc.]\"\n  },\n  \"potentiel_engagement\": {\n    \"controverse_level\": \"[faible/moyen/fort]\",\n    \"debat_en_cours\": \"[Y a-t-il un débat actif ?]\",\n    \"opinion_leaders\": [\"[Qui en parle déjà]\"],\n    \"angle_polémique\": \"[Aspect qui peut faire débat]\",\n    \"potentiel_viral\": \"[Estimation 1-5]\"\n  },\n  \"enrichissement_contenu\": {\n    \"anecdotes_vector_store\": [\n      {\n        \"id\": \"[ref_anecdote]\",\n        \"resume\": \"[Description courte]\",\n        \"connexion_actu\": \"[Pourquoi elle colle à cette actu]\"\n      }\n    ],\n    \"piliers_narratifs\": [\n      {\n        \"pilier\": \"[nom_pilier]\",\n        \"angle_connection\": \"[Comment connecter ce pilier à l'actu]\"\n      }\n    ],\n    \"questions_martin\": [\n      \"[Question pour récolter son opinion personnelle]\",\n      \"[Question sur expérience client similaire]\",\n      \"[Question sur prédiction/tendance future]\",\n      \"[Question sur conseil concret aux entrepreneurs]\"\n    ]\n  },\n  \"formats_multi_canal\": {\n    \"format_primaire\": \"[post_linkedin/thread_twitter/video_tiktok/reel_instagram]\",\n    \"formats_secondaires\": [\"[format2]\", \"[format3]\"],\n    \"justification_format\": \"[Pourquoi ce format pour cette actu]\",\n    \"hooks_suggeres\": [\n      \"[Hook polémique]\",\n      \"[Hook storytelling]\",\n      \"[Hook expertise]\"\n    ],\n    \"cta_optimaux\": [\n      \"[CTA engagement]\",\n      \"[CTA business]\",\n      \"[CTA discussion]\"\n    ]\n  },\n  \"strategie_amplification\": {\n    \"timing_optimal\": \"[Moment précis de publication]\",\n    \"hashtags_trending\": [\"[hashtag1]\", \"[hashtag2]\"],\n    \"influenceurs_taguer\": [\"[nom1]\", \"[nom2]\"],\n    \"groupes_linkedin_cibles\": [\"[groupe1]\", \"[groupe2]\"],\n    \"potentiel_série\": \"[Cette actu peut-elle devenir une série de contenus ?]\"\n  },\n  \"intelligence_concurrentielle\": {\n    \"concurrents_actifs\": [\n      {\n        \"nom\": \"[concurrent]\",\n        \"angle_pris\": \"[leur approche]\",\n        \"engagement_recu\": \"[niveau d'engagement]\"\n      }\n    ],\n    \"angle_libre_identifie\": \"[L'angle que personne n'a encore pris]\",\n    \"différenciation_martin\": \"[Comment Martin peut se démarquer spécifiquement]\",\n    \"fenetre_opportunite\": \"[Combien de temps avant saturation]\"\n  },\n  \"roi_potentiel\": {\n    \"niveau_priorité\": \"[haute/moyenne/faible]\",\n    \"potentiel_lead_generation\": \"[Peut générer des prospects ?]\",\n    \"potentiel_personal_branding\": \"[Renforce la notoriété ?]\",\n    \"effort_production\": \"[faible/moyen/fort]\",\n    \"score_opportunite\": \"[1-10]\"\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -1528,
+        400
+      ],
+      "id": "6233b105-02ad-4cfb-a128-b38084a64d3c",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "description": "call this tools to store the json ",
+        "jsCode": "const data = $getWorkflowStaticData(\"global\");\ndelete data.result  \ndata.result = query;\nreturn JSON.stringify(data.result) || \"\";\n\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        -1656,
+        400
+      ],
+      "id": "330404ce-87cd-46b4-bf95-87b5441b38a6",
+      "name": "Code Tool"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Utilise moi pour recuperer les info sur le personnal branding de Martin",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -1016,
+        400
+      ],
+      "id": "f67de584-39c0-4916-8f21-bb9ce84955cd",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "BJzJPKTOczvT3RLv",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -936,
+        608
+      ],
+      "id": "7c96696e-1cd9-484b-81c4-9dbea1b99008",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "fNvDaVNMD4o6ThGT",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $getWorkflowStaticData(\"global\");\nreturn JSON.stringify(data.result) || \"\";\n\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        -728,
+        400
+      ],
+      "id": "e2a1b80a-3a3c-4fe4-b46d-5874f5bb69e1",
+      "name": "Code Tool1"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -3072,
+        920
+      ],
+      "id": "fd29a672-bef9-4331-9d6a-96923d0edce0",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "description": "envoie les enregistrement ici",
+        "workflowId": {
+          "__rl": true,
+          "value": "tirpVDBgjThnwitg",
+          "mode": "list",
+          "cachedResultName": "Plan éditorial collaboratif Martin Branding"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -600,
+        400
+      ],
+      "id": "322aeec4-2d82-49a2-9fd0-2208871ba27d",
+      "name": "agent_store"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "traite les donne",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Traite ces donné pour avoir un tableua de json \n{{$json.query}}\n\nformt attendu:\n``\n[\n{\n\"Date\":\"\" sous forme de DD/mm/AAA ,\n\"Heure\":\"\" // h:mm,\n\"Brief\":\"\",//json\n\"Agent\":\"\",//enum \"Vidéo Producer\",\"Lifestyle et Terrain\",\"Tech et Business\",\"Vision\"\n\"Format\":\"\"\n\n},\n...\n]\n``\n<think>\nCombien y a t il d'élement avec date ?\n</think>\n\nAction :\nGénére les item correspandant au nombre de date sans changer les données\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -2568,
+        920
+      ],
+      "id": "846905b0-2b94-413f-bfcf-29b502585ab5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2624,
+        1144
+      ],
+      "id": "52040c15-b9cb-4797-a9e8-33a5607781b2",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "fNvDaVNMD4o6ThGT",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"array\",\n  \"items\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"Date\": {\n        \"type\": \"string\",\n        \"format\": \"date\",\n        \"description\": \"La date de l'événement\"\n      },\n      \"Heure\": {\n        \"type\": \"string\",\n        \"pattern\": \"^([01]?[0-9]|2[0-3]):[0-5][0-9]$\",\n        \"description\": \"L'heure au format HH:mm\"\n      },\n      \"Brief\": {\n        \"type\": \"string\",\n        \"description\": \"Résumé ou description brève\"\n      },\n      \"Agent\": {\n        \"type\": \"string\",\n        \"enum\": [\n          \"Vidéo Producer\",\n          \"Lifestyle et Terrain\",\n          \"Tech et Business\",\n          \"Vision\"\n        ],\n        \"description\": \"Type d'agent en charge du contenu\"\n      },\n      \"Format\": {\n        \"type\": \"string\",\n        \"description\": \"Format du contenu (ex: article, vidéo, carrousel, etc.)\"\n      }\n    },\n    \"required\": [\"Date\", \"Heure\", \"Brief\", \"Agent\", \"Format\"],\n    \"additionalProperties\": false\n  }\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -2368,
+        1144
+      ],
+      "id": "ddd7f1b8-057e-4222-b50d-4cb0baca9895",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -2160,
+        920
+      ],
+      "id": "f7878c4d-11ac-44ca-a3b3-63e0a47b7d51",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appVlQK2zUlkxq28Y",
+          "mode": "list",
+          "cachedResultName": "Team Branding",
+          "cachedResultUrl": "https://airtable.com/appVlQK2zUlkxq28Y"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl7ElpRFBekMxpkQ",
+          "mode": "list",
+          "cachedResultName": "Plan_Editorial",
+          "cachedResultUrl": "https://airtable.com/appVlQK2zUlkxq28Y/tbl7ElpRFBekMxpkQ"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $json.Date }}",
+            "Heure": "={{ $json.Heure }}",
+            "Brief": "={{ $json.Brief }}",
+            "Status": "A rediger",
+            "Format": "={{ $json.Format }}",
+            "Agent Responsable": "={{ $json.Agent }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Heure",
+              "displayName": "Heure",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date_publication",
+              "displayName": "Date_publication",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Format",
+              "displayName": "Format",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Agent Responsable",
+              "displayName": "Agent Responsable",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Vision",
+                  "value": "Vision"
+                },
+                {
+                  "name": "Tech & Business",
+                  "value": "Tech & Business"
+                },
+                {
+                  "name": "Lifestyle & Terrain",
+                  "value": "Lifestyle & Terrain"
+                },
+                {
+                  "name": "Vidéo Producer",
+                  "value": "Vidéo Producer"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Brief",
+              "displayName": "Brief",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "A rediger",
+                  "value": "A rediger"
+                },
+                {
+                  "name": "Rediger",
+                  "value": "Rediger"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -1936,
+        920
+      ],
+      "id": "d385a48a-13dc-433b-8790-333b061e42e9",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "5logqgK3Ed7UezZ4",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a54cb0c6-410e-427d-8c57-23297d2bce7d",
+              "name": "query",
+              "value": "={{ JSON.parse($json.query) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2848,
+        920
+      ],
+      "id": "8da84332-4700-431b-b169-d296ea954f59",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        -2496,
+        1144
+      ],
+      "id": "53135619-e945-40a3-8147-ba8cb206f3b7",
+      "name": "Think1"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AGENT MASTER",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AGENT NEWS",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "AGENT MASTER",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AGENT NEWS": {
+      "ai_tool": [
+        [
+          {
+            "node": "AGENT MASTER",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AGENT MASTER": {
+      "main": [
+        []
+      ]
+    },
+    "AGENT CONTENT": {
+      "ai_tool": [
+        [
+          {
+            "node": "AGENT MASTER",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AGENT CONTENT",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think3": {
+      "ai_tool": [
+        [
+          {
+            "node": "AGENT MASTER",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AGENT CONTENT",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Perplexity",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity": {
+      "ai_tool": [
+        [
+          {
+            "node": "AGENT NEWS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AGENT NEWS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AGENT NEWS",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "AGENT MASTER",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AGENT NEWS",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AGENT CONTENT",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AGENT MASTER",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AGENT NEWS",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AGENT NEWS",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "AGENT MASTER",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AGENT CONTENT",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Tool1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AGENT CONTENT",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agent_store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AGENT CONTENT",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "query": "{\n  \"plan_editorial_complet_octobre_2025\": {\n    \"meta\": {\n      \"titre\": \"Plan Éditorial Mensuel Martin Kraemer - Octobre 2025\",\n      \"date_creation\": \"2025-09-10\",\n      \"statut\": \"VALIDÉ PAR MARTIN\",\n      \"total_contenus\": 20,\n      \"periode\": \"07/10/2025 - 01/11/2025\",\n      \"agent_createur\": \"Agent Content\",\n      \"copyrwighters_assigenes\": [\"Vision\", \"Tech & Business\", \"Lifestyle & Terrain\", \"Vidéo Producer\"]\n    },\n    \"axes_strategiques\": {\n      \"axe_1\": {\n        \"nom\": \"L'IA qui libère vs l'IA qui asservit\",\n        \"pourcentage\": \"40%\",\n        \"contenus_associes\": 8,\n        \"objectif\": \"Capitaliser sur controverse IA/emploi avec positionnement différenciant Martin\",\n        \"copywriters_principaux\": [\"Vision\", \"Tech & Business\"],\n        \"piliers_narratifs_connectes\": [\"IA & libération humaine\", \"Multientrepreneuriat et systèmes interconnectés\"]\n      },\n      \"axe_2\": {\n        \"nom\": \"Écosystème d'entreprises : le modèle Martin\",\n        \"pourcentage\": \"35%\", \n        \"contenus_associes\": 7,\n        \"objectif\": \"Valoriser modèle unique d'entreprises interconnectées\",\n        \"copywriters_principaux\": [\"Tech & Business\", \"Lifestyle & Terrain\"],\n        \"piliers_narratifs_connectes\": [\"Multientrepreneuriat et systèmes interconnectés\", \"Vision philosophique du monde\"]\n      },\n      \"axe_3\": {\n        \"nom\": \"Automatisation sans déshumanisation\",\n        \"pourcentage\": \"25%\",\n        \"contenus_associes\": 5,\n        \"objectif\": \"Position éthique différenciante sur automatisation\",\n        \"copywriters_principaux\": [\"Vision\", \"Lifestyle & Terrain\", \"Vidéo Producer\"],\n        \"piliers_narratifs_connectes\": [\"Retour aux racines et réappropriation du temps\", \"Spiritualité simple et incarnée\"]\n      }\n    },\n    \"repartition_copywriters\": {\n      \"Vision\": {\n        \"nombre_contenus\": 6,\n        \"pourcentage\": \"30%\",\n        \"formats_principaux\": [\"Post LinkedIn inspiration\", \"Post LinkedIn manifeste\", \"Post LinkedIn tranchant\"],\n        \"specialites\": [\"Liberté radicale\", \"Vision philosophique\", \"Transformation entrepreneuriale\"],\n        \"mots_cles_activation\": [\"liberté\", \"autonomie\", \"systèmes\", \"communauté\", \"vision\", \"futur\", \"transformation\"]\n      },\n      \"Tech & Business\": {\n        \"nombre_contenus\": 7,\n        \"pourcentage\": \"35%\",\n        \"formats_principaux\": [\"Thread Twitter analytique\", \"Carrousel LinkedIn\", \"Thread Twitter pratique\"],\n        \"specialites\": [\"IA concrète\", \"ROI business\", \"Métriques\", \"Écosystème entreprises\"],\n        \"mots_cles_activation\": [\"IA\", \"SaaS\", \"automatisation\", \"ROI\", \"stratégie\", \"innovation\", \"tech\", \"data\", \"performance\"]\n      },\n      \"Lifestyle & Terrain\": {\n        \"nombre_contenus\": 4,\n        \"pourcentage\": \"20%\",\n        \"formats_principaux\": [\"Post LinkedIn narratif\", \"Post LinkedIn storytelling\", \"Post LinkedIn personnel\"],\n        \"specialites\": [\"Anecdotes authentiques\", \"Parcours personnel\", \"Équilibre vie/business\"],\n        \"mots_cles_activation\": [\"quotidien\", \"terrain\", \"humain\", \"anecdote\", \"réel\", \"expérience\", \"authenticité\"]\n      },\n      \"Vidéo Producer\": {\n        \"nombre_contenus\": 3,\n        \"pourcentage\": \"15%\",\n        \"formats_principaux\": [\"Reel Instagram/TikTok\", \"Vidéo interview\", \"Reel coulisses/documentaire\"],\n        \"specialites\": [\"Scripts vidéo\", \"Storytelling visuel\", \"Contenus techniques vidéo\"],\n        \"formats_techniques\": [\"30-60 secondes Reels\", \"5-10 minutes interviews\", \"Documentaire coulisses\"]\n      }\n    },\n    \"calendrier_detaille_avec_briefs\": {\n      \"semaine_1\": {\n        \"periode\": \"07/10 - 13/10\",\n        \"contenus\": [\n          {\n            \"id\": \"content_001\",\n            \"date\": \"07/10\",\n            \"heure\": \"08h30\",\n            \"titre\": \"L'IA ne remplacera jamais un bon entrepreneur. Mais un bon entrepreneur qui utilise l'IA remplacera beaucoup de concurrents.\",\n            \"format\": \"Post LinkedIn long-form\",\n            \"axe\": \"L'IA qui libère vs l'IA qui asservit\",\n            \"copywriter_assigne\": \"Vision\",\n            \"hook\": \"Pendant que tout le monde a peur de l'IA, les vrais entrepreneurs voient l'opportunité...\",\n            \"cta\": \"Et vous, comment comptez-vous faire de l'IA votre avantage concurrentiel ?\",\n            \"brief_detaille\": {\n              \"angle\": \"L'IA comme multiplicateur d'entrepreneur\",\n              \"instruction\": \"Développer la citation existante de Martin en post inspirant sur la transformation des menaces en opportunités. Utiliser le vocabulaire naturel Martin : 'vision', 'transformation', 'émancipation'\",\n              \"source_contenu\": \"Citation Martin existante: 'L'IA ne remplacera jamais un bon entrepreneur. Mais un bon entrepreneur qui utilise l'IA remplacera beaucoup de concurrents.' + vision liberté radicale\",\n              \"pilier_narratif\": \"IA & libération humaine\",\n              \"valeurs_connectees\": [\"Liberté radicale\", \"Vision à 10 ans\"],\n              \"lexique_recommande\": [\"Automatisation intelligente\", \"Transformation\", \"Avantage compétitif\", \"Vision opérationnelle\"],\n              \"ton_requis\": \"Tranchant, incarné, sans fioriture. Jamais édulcoré, jamais racoleur\",\n              \"structure_recommandee\": \"Accroche > contexte > leçon > ouverture\",\n              \"longueur_cible\": \"800-1300 caractères\"\n            }\n          },\n          {\n            \"id\": \"content_002\", \n            \"date\": \"08/10\",\n            \"heure\": \"09h00\",\n            \"titre\": \"J'ai automatisé 80% de mes processus business. Résultat : +10h/semaine et +40% de CA\",\n            \"format\": \"Thread Twitter avec données\",\n            \"axe\": \"L'IA qui libère vs l'IA qui asservit\",\n            \"copywriter_assigne\": \"Tech & Business\",\n            \"hook\": \"Ces chiffres vont faire réfléchir tous ceux qui hésitent encore à automatiser...\",\n            \"cta\": \"Quelle tâche chronophage pourriez-vous automatiser dès demain ?\",\n            \"brief_detaille\": {\n              \"angle\": \"ROI concret de l'automatisation\",\n              \"instruction\": \"Présenter des chiffres réels d'automatisation dans l'écosystème Martin, focus efficacité mesurable. Utiliser données concrètes et éviter le blabla marketing\",\n              \"source_contenu\": \"Implémentation IA dans Blackcore AI et autres entreprises de l'écosystème Martin\",\n              \"pilier_narratif\": \"Multientrepreneuriat et systèmes interconnectés\",\n              \"valeurs_connectees\": [\"Automatiser au maximum, sans humains, pour maximiser la créativité\"],\n              \"lexique_recommande\": [\"ROI\", \"Gains mesurables\", \"Process invisible\", \"Scalabilité\", \"Efficacité augmentée\"],\n              \"ton_requis\": \"Analytique avec données précises, éviter corporate/marketing conventionnel\",\n              \"structure_recommandee\": \"Thread 5-7 tweets avec métriques progressives\",\n              \"longueur_cible\": \"600-1200 caractères par tweet\"\n            }\n          },\n          {\n            \"id\": \"content_003\",\n            \"date\": \"09/10\", \n            \"heure\": \"08h45\",\n            \"titre\": \"De renvoyé d'internat à fondateur de 7 entreprises : ce que m'a appris l'échec scolaire\",\n            \"format\": \"Post LinkedIn narratif\",\n            \"axe\": \"Automatisation sans déshumanisation\",\n            \"copywriter_assigne\": \"Lifestyle & Terrain\",\n            \"hook\": \"Ce que l'école m'a le mieux appris ? Que je n'étais pas fait pour l'école.\",\n            \"cta\": \"Vos échecs vous ont-ils menés vers votre vraie voie ?\",\n            \"brief_detaille\": {\n              \"angle\": \"L'échec comme fondation du succès\",\n              \"instruction\": \"Raconter le parcours scolaire chaotique de Martin et comment ça a forgé l'entrepreneur autodidacte. Utiliser l'anecdote du refus du formatage\",\n              \"source_contenu\": \"Parcours scolaire chaotique, renvois, internats, abandon en seconde. Anecdote : 'J'ai quitté l'école très tôt. Ce n'était pas un rejet de l'apprentissage, mais du conditionnement.'\",\n              \"pilier_narratif\": \"Retour aux racines et réappropriation du temps\",\n              \"valeurs_connectees\": [\"Jamais de posture de victime\", \"Travail ancré\"],\n              \"lexique_recommande\": [\"Bourlinguer\", \"Personnage atypique\", \"Monde réel\", \"Prendre des risques\", \"Émancipation\"],\n              \"ton_requis\": \"Narratif incarné, authentique, connecté au réel\",\n              \"structure_recommandee\": \"Anecdote personnelle > enchaînement vers vision du monde > leçon > CTA implicite\",\n              \"longueur_cible\": \"400-900 caractères\"\n            }\n          },\n          {\n            \"id\": \"content_004\",\n            \"date\": \"10/10\",\n            \"heure\": \"09h15\", \n            \"titre\": \"Comment créer un écosystème d'entreprises qui se nourrissent mutuellement\",\n            \"format\": \"Carrousel LinkedIn 5 slides\",\n            \"axe\": \"Écosystème d'entreprises : le modèle Martin\",\n            \"copywriter_assigne\": \"Tech & Business\",\n            \"hook\": \"1+1 = 3 quand vos entreprises travaillent ensemble...\",\n            \"cta\": \"Quelles synergies pourriez-vous créer dans votre secteur ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Synergies concrètes entre entreprises\",\n              \"instruction\": \"Schématiser les connexions entre Goodtime BNB, HostProtect, MMG, Blackcore AI avec flux clients/données. Montrer la logique de l'écosystème\",\n              \"source_contenu\": \"Écosystème complet: Goodtime BNB → HostProtect → MMG → Blackcore AI avec synergies location saisonnière → assurance → conciergerie → IA\",\n              \"pilier_narratif\": \"Multientrepreneuriat et systèmes interconnectés\", \n              \"valeurs_connectees\": [\"Bâtir un empire d'entreprises interconnectées\"],\n              \"lexique_recommande\": [\"Synergie\", \"Écosystème\", \"Flux de travail\", \"Architecture système\", \"Modèle reproductible\"],\n              \"ton_requis\": \"Pédagogique et concret, focus sur l'aspect systémique\",\n              \"structure_recommandee\": \"Slide 1: Concept > Slides 2-4: Exemples concrets > Slide 5: Application\",\n              \"specifications_visuelles\": \"Schémas avec flèches, icônes entreprises, flux de données\"\n            }\n          },\n          {\n            \"id\": \"content_005\",\n            \"date\": \"11/10\",\n            \"heure\": \"18h00\",\n            \"titre\": \"En 60 secondes : pourquoi j'automatise tout (sauf l'humain)\",\n            \"format\": \"Reel Instagram/TikTok\", \n            \"axe\": \"Automatisation sans déshumanisation\",\n            \"copywriter_assigne\": \"Vidéo Producer\",\n            \"hook\": \"Voici à quoi ressemble une journée 100% automatisée...\",\n            \"cta\": \"L'automatisation vous fait-elle peur ou envie ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Automatisation éthique en action\",\n              \"instruction\": \"Script 60 secondes montrant Martin dans son quotidien, alternance tâches automatisées/moments famille\",\n              \"source_contenu\": \"Quotidien entre Italie/Bulgarie, père de famille (fils et fille), automatisation pour libérer temps créatif\",\n              \"pilier_narratif\": \"Spiritualité simple et incarnée\",\n              \"valeurs_connectees\": [\"Famille et loyauté\", \"Temps libéré\"],\n              \"format_technique\": {\n                \"duree\": \"60 secondes\",\n                \"style\": \"Montage dynamique\",\n                \"elements_requis\": [\"sous-titres\", \"musique énergique\", \"plans courts\"],\n                \"lieux_tournage\": [\"Bureau/workspace\", \"Moments famille\", \"Outils automatisation\"],\n                \"ratio\": \"9:16 (vertical)\",\n                \"qualite\": \"1080p minimum\"\n              },\n              \"structure_video\": \"Intro punch (3s) > Démonstration automatisation (40s) > Moment famille (12s) > CTA (5s)\",\n              \"ton_requis\": \"Authentique, rythmé, pas de mise en scène artificielle\"\n            }\n          }\n        ]\n      },\n      \"semaine_2\": {\n        \"periode\": \"14/10 - 20/10\",\n        \"contenus\": [\n          {\n            \"id\": \"content_006\",\n            \"date\": \"14/10\",\n            \"heure\": \"08h30\",\n            \"titre\": \"La vérité sur la liberté économique : c'est plus dur qu'on vous le dit\",\n            \"format\": \"Post LinkedIn tranchant\",\n            \"axe\": \"L'IA qui libère vs l'IA qui asservit\", \n            \"copywriter_assigne\": \"Vision\",\n            \"hook\": \"On vous vend la liberté économique comme un rêve. Voici la réalité...\",\n            \"cta\": \"Êtes-vous prêt à payer le prix de votre liberté ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Réalisme sur l'entrepreneuriat\",\n              \"instruction\": \"Déconstruire les mythes de la liberté facile, parler du prix réel de l'autonomie économique sans posture de victime\",\n              \"source_contenu\": \"Valeurs fondamentales : liberté radicale mais avec travail ancré, jamais de posture de victime\",\n              \"pilier_narratif\": \"IA & libération humaine\",\n              \"valeurs_connectees\": [\"Liberté radicale\", \"Travail ancré\", \"Autonomie économique\"],\n              \"lexique_recommande\": [\"Émancipation\", \"Temps\", \"Risque calculé\", \"Concret\", \"Terrain\"],\n              \"ton_requis\": \"Tranchant, direct, réaliste sans décourager\",\n              \"structure_recommandee\": \"Déconstruction mythe > réalité terrain > encouragement action\",\n              \"longueur_cible\": \"800-1300 caractères\"\n            }\n          },\n          {\n            \"id\": \"content_007\",\n            \"date\": \"15/10\",\n            \"heure\": \"09h00\",\n            \"titre\": \"ROI d'une IA business : les vraies métriques que personne ne vous dit\",\n            \"format\": \"Thread Twitter analytique\",\n            \"axe\": \"L'IA qui libère vs l'IA qui asservit\",\n            \"copywriter_assigne\": \"Tech & Business\", \n            \"hook\": \"Ces métriques d'IA que les vendeurs cachent vous coûtent cher...\",\n            \"cta\": \"Quelles métriques suivez-vous pour mesurer l'impact de l'IA ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Métriques concrètes IA business\",\n              \"instruction\": \"Données chiffrées sur implémentation IA, coûts cachés, délais réels, erreurs communes. Éviter le marketing et donner du concret\",\n              \"source_contenu\": \"Expérience Blackcore AI, implémentation IA dans écosystème Martin, retours clients\",\n              \"pilier_narratif\": \"Multientrepreneuriat et systèmes interconnectés\",\n              \"valeurs_connectees\": [\"Concret\", \"ROI\", \"Performance\"],\n              \"lexique_recommande\": [\"ROI\", \"Gains mesurables\", \"Optimisation\", \"Performance\", \"IA conviviale\"],\n              \"ton_requis\": \"Analytique précis, données factuelles, éviter le corporate\",\n              \"structure_recommandee\": \"Thread 6-8 tweets : métriques cachées > coûts réels > délais > erreurs > solutions\",\n              \"longueur_cible\": \"280 caractères par tweet\"\n            }\n          },\n          {\n            \"id\": \"content_008\",\n            \"date\": \"16/10\",\n            \"heure\": \"08h45\",\n            \"titre\": \"Entre l'Italie et la Bulgarie : pourquoi j'ai choisi la liberté géographique\",\n            \"format\": \"Post LinkedIn lifestyle\",\n            \"axe\": \"Automatisation sans déshumanisation\",\n            \"copywriter_assigne\": \"Lifestyle & Terrain\",\n            \"hook\": \"Diriger 7 entreprises depuis 2 pays différents : voici comment j'y arrive...\",\n            \"cta\": \"La liberté géographique fait-elle partie de vos objectifs ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Liberté géographique et business\",\n              \"instruction\": \"Expliquer le choix de vie nomade, impact sur famille et business, automatisation comme facilitateur\",\n              \"source_contenu\": \"Vie entre Italie et Bulgarie, marié père de 2 enfants (fils et fille), écosystème business automatisé\",\n              \"pilier_narratif\": \"Retour aux racines et réappropriation du temps\",\n              \"valeurs_connectees\": [\"Famille et loyauté\", \"Liberté radicale\"],\n              \"lexique_recommande\": [\"Liberté\", \"Équilibre\", \"Fluide\", \"Temps\", \"Micro-monde\"],\n              \"ton_requis\": \"Personnel mais pas intime, inspirant et réaliste\",\n              \"structure_recommandee\": \"Situation actuelle > motivations > défis > solutions > vision\",\n              \"longueur_cible\": \"400-900 caractères\"\n            }\n          },\n          {\n            \"id\": \"content_009\",\n            \"date\": \"17/10\",\n            \"heure\": \"09h15\",\n            \"titre\": \"Anatomie d'un empire business : de Goodtime BNB à Blackcore AI\",\n            \"format\": \"Carrousel LinkedIn détaillé\",\n            \"axe\": \"Écosystème d'entreprises : le modèle Martin\",\n            \"copywriter_assigne\": \"Tech & Business\",\n            \"hook\": \"7 ans, 7 entreprises, 1 seule stratégie...\",\n            \"cta\": \"Quelle serait votre prochaine entreprise complémentaire ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Construction chronologique de l'écosystème\",\n              \"instruction\": \"Timeline des créations d'entreprises, logique de diversification, synergies développées étape par étape\",\n              \"source_contenu\": \"Goodtime BNB → Quozyli → Opaline → Cledicihome/MMG → Valya Expérience → HostProtect → Blackcore AI\",\n              \"pilier_narratif\": \"Multientrepreneuriat et systèmes interconnectés\",\n              \"valeurs_connectees\": [\"Bâtir un empire d'entreprises interconnectées\", \"Vision\"],\n              \"lexique_recommande\": [\"Stratégie\", \"Roadmap\", \"Synergie\", \"Architecture système\", \"Scalabilité\"],\n              \"ton_requis\": \"Pédagogique et stratégique, montrer la logique de construction\",\n              \"structure_recommandee\": \"Slide 1: Vue d'ensemble > Slides 2-6: Chronologie avec logique > Slide 7: Perspective future\",\n              \"specifications_visuelles\": \"Timeline visuelle, logos entreprises, flèches progression, chiffres clés\"\n            }\n          },\n          {\n            \"id\": \"content_010\",\n            \"date\": \"18/10\",\n            \"heure\": \"18h00\",\n            \"titre\": \"Interview : 'Pourquoi l'IA ne tuera pas l'emploi mais le transformera'\",\n            \"format\": \"Vidéo interview 8 minutes\",\n            \"axe\": \"L'IA qui libère vs l'IA qui asservit\",\n            \"copywriter_assigne\": \"Vidéo Producer\",\n            \"hook\": \"Ma prédiction sur l'avenir du travail va vous surprendre...\",\n            \"cta\": \"Partagez votre vision de l'avenir du travail en commentaire\",\n            \"brief_detaille\": {\n              \"angle\": \"Vision prospective IA/emploi\",\n              \"instruction\": \"Interview format question/réponse, Martin développe sa vision transformation vs destruction emplois\",\n              \"source_contenu\": \"Vision 10 ans : automatiser sans humains pour maximiser créativité, équilibre technologie/social\",\n              \"pilier_narratif\": \"IA & libération humaine\",\n              \"valeurs_connectees\": [\"Vision à 10 ans\", \"Jamais de posture de victime\"],\n              \"format_technique\": {\n                \"duree\": \"8 minutes\",\n                \"style\": \"Interview face caméra\",\n                \"elements_requis\": [\"3 angles caméra\", \"sous-titres\", \"extraits courts pour réseaux\"],\n                \"questions_cles\": [\"Impact réel IA sur emploi\", \"Transformation vs destruction\", \"Rôle de l'humain\", \"Prédictions 2025\"],\n                \"qualite\": \"4K\", \n                \"eclairage\": \"Professionnel, setup studio\"\n              },\n              \"structure_video\": \"Intro (30s) > Q1: État actuel (2min) > Q2: Transformation (3min) > Q3: Avenir (2min) > Conclusion (30s)\",\n              \"ton_requis\": \"Expertise crédible, vision claire, éviter la langue de bois\"\n            }\n          }\n        ]\n      },\n      \"semaine_3\": {\n        \"periode\": \"21/10 - 27/10\",\n        \"contenus\": [\n          {\n            \"id\": \"content_011\",\n            \"date\": \"21/10\",\n            \"heure\": \"08h30\",\n            \"titre\": \"L'autonomie économique commence par un principe simple : vos process travaillent plus dur que vous\",\n            \"format\": \"Post LinkedIn inspiration\",\n            \"axe\": \"L'IA qui libère vs l'IA qui asservit\",\n            \"copywriter_assigne\": \"Vision\",\n            \"hook\": \"La différence entre bosser dur et bosser intelligent...\",\n            \"cta\": \"Quel process pourriez-vous optimiser cette semaine ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Philosophie de l'automatisation\",\n              \"instruction\": \"Développer la citation existante de Martin 'Vos process devraient travailler plus dur que vous' en manifeste sur l'intelligence des systèmes vs force brute\",\n              \"source_contenu\": \"Citation Martin : 'Vos process devraient travailler plus dur que vous' + vision automatisation intelligente\",\n              \"pilier_narratif\": \"IA & libération humaine\",\n              \"valeurs_connectees\": [\"Automatiser au maximum\", \"Efficacité\"],\n              \"lexique_recommande\": [\"Process invisible\", \"Intelligence\", \"Automatisation intelligente\", \"Effet levier\", \"Temps libéré\"],\n              \"ton_requis\": \"Philosophique mais concret, inspirant et actionnable\",\n              \"structure_recommandee\": \"Citation > explication principe > exemples > application\",\n              \"longueur_cible\": \"800-1300 caractères\"\n            }\n          },\n          {\n            \"id\": \"content_012\",\n            \"date\": \"22/10\",\n            \"heure\": \"09h00\",\n            \"titre\": \"J'ai audité 50 PME cette année : voici les 3 erreurs qui tuent leur croissance\",\n            \"format\": \"Thread Twitter insights\",\n            \"axe\": \"Écosystème d'entreprises : le modèle Martin\",\n            \"copywriter_assigne\": \"Tech & Business\",\n            \"hook\": \"Ces 3 erreurs détruisent 80% des PME que je rencontre...\",\n            \"cta\": \"Laquelle de ces erreurs reconnaissez-vous dans votre business ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Patterns d'échec des PME\",\n              \"instruction\": \"Synthèse des erreurs récurrentes observées dans le conseil Martin, solutions concrètes testées dans son écosystème\",\n              \"source_contenu\": \"Expérience conseil stratégique Martin, observations terrain, solutions appliquées dans écosystème\",\n              \"pilier_narratif\": \"Multientrepreneuriat et systèmes interconnectés\",\n              \"valeurs_connectees\": [\"Concret\", \"Terrain\", \"Solution\"],\n              \"lexique_recommande\": [\"Résilience business\", \"Stratégie\", \"Performance\", \"Optimisation\", \"Transformation\"],\n              \"ton_requis\": \"Expertise terrain, factuel et solution-oriented\",\n              \"structure_recommandee\": \"Thread 7 tweets : Intro choc > Erreur 1 + solution > Erreur 2 + solution > Erreur 3 + solution > Conclusion actionnable\",\n              \"longueur_cible\": \"280 caractères par tweet\"\n            }\n          },\n          {\n            \"id\": \"content_013\",\n            \"date\": \"23/10\",\n            \"heure\": \"08h45\",\n            \"titre\": \"La leçon de la montagne : ce que les figures marginales m'ont appris sur le business\",\n            \"format\": \"Post LinkedIn storytelling\",\n            \"axe\": \"Automatisation sans déshumanisation\",\n            \"copywriter_assigne\": \"Lifestyle & Terrain\",\n            \"hook\": \"Ce que l'école ne m'a jamais appris, la montagne me l'a enseigné...\",\n            \"cta\": \"Qui vous a transmis les leçons les plus importantes ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Apprentissage non-conventionnel\",\n              \"instruction\": \"Raconter l'apprentissage à la montagne auprès de figures fortes et marginales, transmission savoir ancien applicable au business\",\n              \"source_contenu\": \"Apprentissage à la montagne auprès de figures fortes et marginales, transmission des savoirs anciens\",\n              \"pilier_narratif\": \"Retour aux racines et réappropriation du temps\",\n              \"valeurs_connectees\": [\"Transmission des savoirs anciens\", \"Travail ancré\"],\n              \"lexique_recommande\": [\"Transmission\", \"Terrain\", \"Brut\", \"Monde réel\", \"Personnage atypique\"],\n              \"ton_requis\": \"Narratif respectueux, connecté aux valeurs anciennes\",\n              \"structure_recommandee\": \"Mise en situation montagne > personnages rencontrés > leçons apprises > application business\",\n              \"longueur_cible\": \"400-900 caractères\"\n            }\n          },\n          {\n            \"id\": \"content_014\",\n            \"date\": \"24/10\",\n            \"heure\": \"09h15\",\n            \"titre\": \"Web3 et business traditionnel : où sont les vraies opportunités ?\",\n            \"format\": \"Carrousel analyse marché\",\n            \"axe\": \"Écosystème d'entreprises : le modèle Martin\",\n            \"copywriter_assigne\": \"Tech & Business\",\n            \"hook\": \"Web3 : révolution ou effet de mode ? Voici les vraies opportunités...\",\n            \"cta\": \"Voyez-vous des applications Web3 dans votre secteur ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Opportunités concrètes Web3 pour PME\",\n              \"instruction\": \"Identifier applications pratiques Web3 dans business traditionnels, éviter le hype, focus ROI et praticité\",\n              \"source_contenu\": \"Vision technologies émergentes, approche pragmatique innovation, expérience Blackcore AI\",\n              \"pilier_narratif\": \"Vision philosophique du monde\",\n              \"valeurs_connectees\": [\"Innovation\", \"Concret\", \"Vision\"],\n              \"lexique_recommande\": [\"Innovation\", \"Transformation\", \"Avantage compétitif\", \"Modèle reproductible\", \"Stratégie\"],\n              \"ton_requis\": \"Analytique pragmatique, éviter le hype tech\",\n              \"structure_recommandee\": \"Slide 1: État actuel Web3 > Slides 2-4: Opportunités concrètes > Slide 5: Comment commencer\",\n              \"specifications_visuelles\": \"Graphiques ROI, exemples secteurs, étapes implementation\"\n            }\n          },\n          {\n            \"id\": \"content_015\",\n            \"date\": \"25/10\",\n            \"heure\": \"18h00\",\n            \"titre\": \"Tournage entreprise : 1 journée dans l'écosystème Martin Kraemer\",\n            \"format\": \"Reel coulisses/documentaire\",\n            \"axe\": \"Écosystème d'entreprises : le modèle Martin\",\n            \"copywriter_assigne\": \"Vidéo Producer\",\n            \"hook\": \"Une journée dans mon écosystème d'entreprises...\",\n            \"cta\": \"Aimeriez-vous visiter l'une de mes entreprises ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Coulisses multi-entreprises\",\n              \"instruction\": \"Journée type Martin visitant ses différentes entreprises, montrer concrètement l'écosystème en action\",\n              \"source_contenu\": \"Goodtime BNB, MMG, bureaux Blackcore AI, interactions équipes, prises de décision\",\n              \"pilier_narratif\": \"Multientrepreneuriat et systèmes interconnectés\",\n              \"valeurs_connectees\": [\"Écosystème\", \"Concret\", \"Terrain\"],\n              \"format_technique\": {\n                \"duree\": \"90 secondes\",\n                \"style\": \"Documentaire coulisses\",\n                \"elements_requis\": [\"Plans séquences\", \"voix off Martin\", \"musique corporate moderne\"],\n                \"lieux_tournage\": [\"Bureaux différentes entreprises\", \"Réunions équipes\", \"Espaces de travail\"],\n                \"transitions\": \"Rapides entre entreprises\",\n                \"qualite\": \"4K\"\n              },\n              \"structure_video\": \"Intro ecosystème (10s) > Visite entreprise 1 (25s) > Entreprise 2 (25s) > Entreprise 3 (25s) > Vue d'ensemble (5s)\",\n              \"ton_requis\": \"Professionnel mais accessible, montrer la réalité du terrain\"\n            }\n          }\n        ]\n      },\n      \"semaine_4\": {\n        \"periode\": \"28/10 - 03/11\",\n        \"contenus\": [\n          {\n            \"id\": \"content_016\",\n            \"date\": \"28/10\",\n            \"heure\": \"08h30\",\n            \"titre\": \"Pourquoi l'argent suit la valeur (et pas l'inverse) : la règle d'or de l'entrepreneuriat\",\n            \"format\": \"Post LinkedIn manifeste\",\n            \"axe\": \"L'IA qui libère vs l'IA qui asservit\",\n            \"copywriter_assigne\": \"Vision\",\n            \"hook\": \"Le secret que connaissent tous les entrepreneurs à succès...\",\n            \"cta\": \"Comment créez-vous de la valeur avant de penser profit ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Philosophie de la création de valeur\",\n              \"instruction\": \"Développer la citation existante de Martin 'L'argent suit la valeur, pas l'inverse' en principe fondamental, connecter avec automatisation comme créateur de valeur\",\n              \"source_contenu\": \"Citation Martin : 'L'argent suit la valeur, pas l'inverse' + philosophie business + automatisation créatrice de valeur\",\n              \"pilier_narratif\": \"Vision philosophique du monde\",\n              \"valeurs_connectees\": [\"Valeur\", \"Impact\", \"Solution\"],\n              \"lexique_recommande\": [\"Valeur\", \"Impact\", \"Solution\", \"Transformation\", \"Vision opérationnelle\"],\n              \"ton_requis\": \"Manifeste inspirant mais ancré dans le concret\",\n              \"structure_recommandee\": \"Citation > principe fondamental > exemples concrets > call to reflection\",\n              \"longueur_cible\": \"800-1300 caractères\"\n            }\n          },\n          {\n            \"id\": \"content_017\",\n            \"date\": \"29/10\",\n            \"heure\": \"09h00\",\n            \"titre\": \"IA en 2025 : les 5 outils qui vont révolutionner les PME (avec budgets réels)\",\n            \"format\": \"Thread Twitter pratique\",\n            \"axe\": \"L'IA qui libère vs l'IA qui asservit\",\n            \"copywriter_assigne\": \"Tech & Business\",\n            \"hook\": \"Ces 5 outils IA vont changer votre business en 2025...\",\n            \"cta\": \"Quel outil allez-vous tester en premier ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Guide achat IA pour PME\",\n              \"instruction\": \"Sélection outils testés par Martin, budgets transparents, ROI calculé, étapes d'implémentation concrètes\",\n              \"source_contenu\": \"Tests Blackcore AI, retours clients, analyse coût/bénéfice, outils recommandés avec expérience terrain\",\n              \"pilier_narratif\": \"IA & libération humaine\",\n              \"valeurs_connectees\": [\"IA conviviale\", \"ROI\", \"Concret\"],\n              \"lexique_recommande\": [\"ROI\", \"Gains mesurables\", \"IA conviviale\", \"Implémentation\", \"Performance\"],\n              \"ton_requis\": \"Guide pratique ultra-concret, chiffres réels, éviter le marketing\",\n              \"structure_recommandee\": \"Thread 8 tweets : Intro > Outil 1 (coût+ROI) > Outil 2 > Outil 3 > Outil 4 > Outil 5 > Étapes démarrage > CTA\",\n              \"longueur_cible\": \"280 caractères par tweet\"\n            }\n          },\n          {\n            \"id\": \"content_018\",\n            \"date\": \"30/10\",\n            \"heure\": \"08h45\",\n            \"titre\": \"Père de famille et dirigeant de 7 entreprises : comment je concilie les deux\",\n            \"format\": \"Post LinkedIn personnel\",\n            \"axe\": \"Automatisation sans déshumanisation\",\n            \"copywriter_assigne\": \"Lifestyle & Terrain\",\n            \"hook\": \"Mes enfants ne me voient jamais stressé par le boulot. Voici pourquoi...\",\n            \"cta\": \"Comment conciliez-vous vos différents rôles ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Équilibre famille/business\",\n              \"instruction\": \"Témoignage authentique sur conciliation rôle père et entrepreneur multi-entreprises, rôle crucial de l'automatisation\",\n              \"source_contenu\": \"Marié, père d'un fils et d'une fille, famille comme valeur fondamentale, automatisation pour libérer temps famille\",\n              \"pilier_narratif\": \"Spiritualité simple et incarnée\",\n              \"valeurs_connectees\": [\"Famille et loyauté\", \"Équilibre\", \"Temps libéré\"],\n              \"lexique_recommande\": [\"Équilibre\", \"Famille\", \"Temps\", \"Fluide\", \"Aligné\"],\n              \"ton_requis\": \"Personnel et authentique sans être intime, inspirant pour d'autres parents entrepreneurs\",\n              \"structure_recommandee\": \"Constat (stress zéro) > méthodes concrètes > rôle automatisation > vision équilibre\",\n              \"longueur_cible\": \"400-900 caractères\"\n            }\n          },\n          {\n            \"id\": \"content_019\",\n            \"date\": \"31/10\",\n            \"heure\": \"09h15\",\n            \"titre\": \"Bilan : 1 mois d'automatisation intelligente - les résultats vont vous étonner\",\n            \"format\": \"Carrousel résultats\",\n            \"axe\": \"Écosystème d'entreprises : le modèle Martin\",\n            \"copywriter_assigne\": \"Tech & Business\",\n            \"hook\": \"30 jours d'automatisation intensive : voici le vrai bilan...\",\n            \"cta\": \"Quels résultats attendez-vous de l'automatisation ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Bilan chiffré mois d'automatisation\",\n              \"instruction\": \"Métriques réelles du mois octobre, gains temps/argent mesurés, échecs et succès en transparence, apprentissages concrets\",\n              \"source_contenu\": \"Données réelles d'automatisation octobre 2025, métriques business, ROI calculé, témoignages équipes\",\n              \"pilier_narratif\": \"Multientrepreneuriat et systèmes interconnectés\",\n              \"valeurs_connectees\": [\"Gains mesurables\", \"Performance\", \"Transparence\"],\n              \"lexique_recommande\": [\"ROI\", \"Gains mesurables\", \"Performance\", \"Optimisation\", \"Bilan\"],\n              \"ton_requis\": \"Factuel et transparent, montrer succès ET échecs\",\n              \"structure_recommandee\": \"Slide 1: Vue d'ensemble > Slides 2-4: Métriques par secteur > Slide 5: Échecs et apprentissages > Slide 6: Perspectives\",\n              \"specifications_visuelles\": \"Graphiques évolution, tableaux métriques, avant/après, pourcentages\"\n            }\n          },\n          {\n            \"id\": \"content_020\",\n            \"date\": \"01/11\",\n            \"heure\": \"18h00\",\n            \"titre\": \"Message de fin d'année : mes 3 prédictions pour l'entrepreneuriat en 2025\",\n            \"format\": \"Vidéo message 5 minutes\",\n            \"axe\": \"L'IA qui libère vs l'IA qui asservit\",\n            \"copywriter_assigne\": \"Vidéo Producer\",\n            \"hook\": \"Mes 3 prédictions pour l'entrepreneuriat en 2025...\",\n            \"cta\": \"Quelle est votre prédiction pour 2025 ?\",\n            \"brief_detaille\": {\n              \"angle\": \"Vision prospective 2025\",\n              \"instruction\": \"Message personnel de Martin, 3 prédictions argumentées sur évolution entrepreneuriat/IA/automatisation basées sur son expérience\",\n              \"source_contenu\": \"Vision 10 ans Martin, tendances observées dans écosystème, évolution business et IA\",\n              \"pilier_narratif\": \"Vision philosophique du monde\",\n              \"valeurs_connectees\": [\"Vision\", \"Transformation\", \"Leadership\"],\n              \"format_technique\": {\n                \"duree\": \"5 minutes\",\n                \"style\": \"Message personnel face caméra\",\n                \"elements_requis\": [\"éclairage doux\", \"sous-titres\", \"extraits partageables\"],\n                \"structure\": \"3 prédictions distinctes avec arguments\",\n                \"ambiance\": \"Intimiste mais professionnel\",\n                \"qualite\": \"4K\"\n              },\n              \"structure_video\": \"Intro personnelle (30s) > Prédiction 1 (90s) > Prédiction 2 (90s) > Prédiction 3 (90s) > Message final (30s)\",\n              \"ton_requis\": \"Visionnaire et inspirant, crédible basé sur l'expérience\"\n            }\n          }\n        ]\n      }\n    },\n    \"elements_martin_integres\": {\n      \"citations_utilisees\": [\n        \"L'IA ne remplacera jamais un bon entrepreneur. Mais un bon entrepreneur qui utilise l'IA remplacera beaucoup de concurrents.\",\n        \"Vos process devraient travailler plus dur que vous.\",\n        \"L'argent suit la valeur, pas l'inverse.\"\n      ],\n      \"anecdotes_exploitees\": [\n        \"Parcours scolaire chaotique, renvois, internats\",\n        \"Apprentissage à la montagne auprès de figures marginales\",\n        \"Vie entre Italie et Bulgarie avec famille\",\n        \"Construction progressive écosystème 7 entreprises\"\n      ],\n      \"valeurs_fondamentales_integrees\": [\n        \"Liberté radicale\",\n        \"Travail ancré\", \n        \"Transmission des savoirs anciens\",\n        \"Famille et loyauté\",\n        \"Jamais de posture de victime\",\n        \"Automatiser au maximum pour maximiser créativité\"\n      ],\n      \"piliers_narratifs_couverts\": [\n        \"IA & libération humaine\",\n        \"Retour aux racines et réappropriation du temps\", \n        \"Vision philosophique du monde\",\n        \"Multientrepreneuriat et systèmes interconnectés\",\n        \"Spiritualité simple et incarnée\"\n      ],\n      \"lexique_martin_utilise\": [\n        \"Bourlinguer\", \"Personnage atypique\", \"Monde réel\", \"Prendre des risques\", \"Vision\", \"Liberté\", \"Transmission\", \"Concret\", \"Terrain\", \"Brut\", \"Temps\", \"Émancipation\", \"Automatisation intelligente\", \"Process invisible\", \"ROI\", \"Gains mesurables\", \"Synergie\", \"Écosystème\"\n      ]\n    },\n    \"prochaines_etapes_execution\": {\n      \"1\": \"✅ Plan validé par Martin\", \n      \"2\": \"✅ Briefs détaillés créés par Agent Content\",\n      \"3\": \"🔄 Transmission aux copywriters pour rédaction\",\n      \"4\": \"⏳ Création des contenus selon briefs\",\n      \"5\": \"⏳ Validation Martin des contenus finaux\", \n      \"6\": \"⏳ Programmation et publication selon calendrier\",\n      \"7\": \"⏳ Suivi métriques et optimisations\"\n    },\n    \"instructions_finales_copywriters\": {\n      \"Vision\": \"Focus sur inspiration et philosophie business. Utiliser le vocabulaire Martin : transformation, émancipation, vision. Ton tranchant mais inspirant. Citations Martin à développer en manifestes.\",\n      \"Tech & Business\": \"Focus données chiffrées et ROI concret. Éviter marketing corporate. Utiliser expérience Blackcore AI et écosystème. Ton analytique précis.\",\n      \"Lifestyle & Terrain\": \"Focus anecdotes authentiques et parcours personnel. Utiliser vraies histoires Martin : montagne, école, famille. Ton narratif incarné sans être intime.\",\n      \"Vidéo Producer\": \"Scripts techniques détaillés fournis. Respecter durées et formats. Montrer Martin en action, éviter mise en scène artificielle. Sous-titres obligatoires.\"\n    }\n  }\n}"
+      }
+    ],
+    "AI Agent": [
+      {
+        "output": [
+          {
+            "Date": "07/10/2025",
+            "Heure": "08h30",
+            "Brief": "{\"angle\":\"L'IA comme multiplicateur d'entrepreneur\",\"instruction\":\"Développer la citation existante de Martin en post inspirant sur la transformation des menaces en opportunités. Utiliser le vocabulaire naturel Martin : 'vision', 'transformation', 'émancipation'\",\"source_contenu\":\"Citation Martin existante: 'L'IA ne remplacera jamais un bon entrepreneur. Mais un bon entrepreneur qui utilise l'IA remplacera beaucoup de concurrents.' + vision liberté radicale\",\"pilier_narratif\":\"IA & libération humaine\",\"valeurs_connectees\":[\"Liberté radicale\",\"Vision à 10 ans\"],\"lexique_recommande\":[\"Automatisation intelligente\",\"Transformation\",\"Avantage compétitif\",\"Vision opérationnelle\"],\"ton_requis\":\"Tranchant, incarné, sans fioriture. Jamais édulcoré, jamais racoleur\",\"structure_recommandee\":\"Accroche > contexte > leçon > ouverture\",\"longueur_cible\":\"800-1300 caractères\"}",
+            "Agent": "Vision",
+            "Format": "Post LinkedIn long-form"
+          },
+          {
+            "Date": "08/10/2025",
+            "Heure": "09h00",
+            "Brief": "{\"angle\":\"ROI concret de l'automatisation\",\"instruction\":\"Présenter des chiffres réels d'automatisation dans l'écosystème Martin, focus efficacité mesurable. Utiliser données concrètes et éviter le blabla marketing\",\"source_contenu\":\"Implémentation IA dans Blackcore AI et autres entreprises de l'écosystème Martin\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Automatiser au maximum, sans humains, pour maximiser la créativité\"],\"lexique_recommande\":[\"ROI\",\"Gains mesurables\",\"Process invisible\",\"Scalabilité\",\"Efficacité augmentée\"],\"ton_requis\":\"Analytique avec données précises, éviter corporate/marketing conventionnel\",\"structure_recommandee\":\"Thread 5-7 tweets avec métriques progressives\",\"longueur_cible\":\"600-1200 caractères par tweet\"}",
+            "Agent": "Tech & Business",
+            "Format": "Thread Twitter avec données"
+          },
+          {
+            "Date": "09/10/2025",
+            "Heure": "08h45",
+            "Brief": "{\"angle\":\"L'échec comme fondation du succès\",\"instruction\":\"Raconter le parcours scolaire chaotique de Martin et comment ça a forgé l'entrepreneur autodidacte. Utiliser l'anecdote du refus du formatage\",\"source_contenu\":\"Parcours scolaire chaotique, renvois, internats, abandon en seconde. Anecdote : 'J'ai quitté l'école très tôt. Ce n'était pas un rejet de l'apprentissage, mais du conditionnement.'\",\"pilier_narratif\":\"Retour aux racines et réappropriation du temps\",\"valeurs_connectees\":[\"Jamais de posture de victime\",\"Travail ancré\"],\"lexique_recommande\":[\"Bourlinguer\",\"Personnage atypique\",\"Monde réel\",\"Prendre des risques\",\"Émancipation\"],\"ton_requis\":\"Narratif incarné, authentique, connecté au réel\",\"structure_recommandee\":\"Anecdote personnelle > enchaînement vers vision du monde > leçon > CTA implicite\",\"longueur_cible\":\"400-900 caractères\"}",
+            "Agent": "Lifestyle & Terrain",
+            "Format": "Post LinkedIn narratif"
+          },
+          {
+            "Date": "10/10/2025",
+            "Heure": "09h15",
+            "Brief": "{\"angle\":\"Synergies concrètes entre entreprises\",\"instruction\":\"Schématiser les connexions entre Goodtime BNB, HostProtect, MMG, Blackcore AI avec flux clients/données. Montrer la logique de l'écosystème\",\"source_contenu\":\"Écosystème complet: Goodtime BNB → HostProtect → MMG → Blackcore AI avec synergies location saisonnière → assurance → conciergerie → IA\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Bâtir un empire d'entreprises interconnectées\"],\"lexique_recommande\":[\"Synergie\",\"Écosystème\",\"Flux de travail\",\"Architecture système\",\"Modèle reproductible\"],\"ton_requis\":\"Pédagogique et concret, focus sur l'aspect systémique\",\"structure_recommandee\":\"Slide 1: Concept > Slides 2-4: Exemples concrets > Slide 5: Application\",\"specifications_visuelles\":\"Schémas avec flèches, icônes entreprises, flux de données\"}",
+            "Agent": "Tech & Business",
+            "Format": "Carrousel LinkedIn 5 slides"
+          },
+          {
+            "Date": "11/10/2025",
+            "Heure": "18h00",
+            "Brief": "{\"angle\":\"Automatisation éthique en action\",\"instruction\":\"Script 60 secondes montrant Martin dans son quotidien, alternance tâches automatisées/moments famille\",\"source_contenu\":\"Quotidien entre Italie/Bulgarie, père de famille (fils et fille), automatisation pour libérer temps créatif\",\"pilier_narratif\":\"Spiritualité simple et incarnée\",\"valeurs_connectees\":[\"Famille et loyauté\",\"Temps libéré\"],\"format_technique\":{\"duree\":\"60 secondes\",\"style\":\"Montage dynamique\",\"elements_requis\":[\"sous-titres\",\"musique énergique\",\"plans courts\"],\"lieux_tournage\":[\"Bureau/workspace\",\"Moments famille\",\"Outils automatisation\"],\"ratio\":\"9:16 (vertical)\",\"qualite\":\"1080p minimum\"},\"structure_video\":\"Intro punch (3s) > Démonstration automatisation (40s) > Moment famille (12s) > CTA (5s)\",\"ton_requis\":\"Authentique, rythmé, pas de mise en scène artificielle\"}",
+            "Agent": "Vidéo Producer",
+            "Format": "Reel Instagram/TikTok"
+          },
+          {
+            "Date": "14/10/2025",
+            "Heure": "08h30",
+            "Brief": "{\"angle\":\"Réalisme sur l'entrepreneuriat\",\"instruction\":\"Déconstruire les mythes de la liberté facile, parler du prix réel de l'autonomie économique sans posture de victime\",\"source_contenu\":\"Valeurs fondamentales : liberté radicale mais avec travail ancré, jamais de posture de victime\",\"pilier_narratif\":\"IA & libération humaine\",\"valeurs_connectees\":[\"Liberté radicale\",\"Travail ancré\",\"Autonomie économique\"],\"lexique_recommande\":[\"Émancipation\",\"Temps\",\"Risque calculé\",\"Concret\",\"Terrain\"],\"ton_requis\":\"Tranchant, direct, réaliste sans décourager\",\"structure_recommandee\":\"Déconstruction mythe > réalité terrain > encouragement action\",\"longueur_cible\":\"800-1300 caractères\"}",
+            "Agent": "Vision",
+            "Format": "Post LinkedIn tranchant"
+          },
+          {
+            "Date": "15/10/2025",
+            "Heure": "09h00",
+            "Brief": "{\"angle\":\"Métriques concrètes IA business\",\"instruction\":\"Données chiffrées sur implémentation IA, coûts cachés, délais réels, erreurs communes. Éviter le marketing et donner du concret\",\"source_contenu\":\"Expérience Blackcore AI, implémentation IA dans écosystème Martin, retours clients\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Concret\",\"ROI\",\"Performance\"],\"lexique_recommande\":[\"ROI\",\"Gains mesurables\",\"Optimisation\",\"Performance\",\"IA conviviale\"],\"ton_requis\":\"Analytique précis, données factuelles, éviter le corporate\",\"structure_recommandee\":\"Thread 6-8 tweets : métriques cachées > coûts réels > délais > erreurs > solutions\",\"longueur_cible\":\"280 caractères par tweet\"}",
+            "Agent": "Tech & Business",
+            "Format": "Thread Twitter analytique"
+          },
+          {
+            "Date": "16/10/2025",
+            "Heure": "08h45",
+            "Brief": "{\"angle\":\"Liberté géographique et business\",\"instruction\":\"Expliquer le choix de vie nomade, impact sur famille et business, automatisation comme facilitateur\",\"source_contenu\":\"Vie entre Italie et Bulgarie, marié père de 2 enfants (fils et fille), écosystème business automatisé\",\"pilier_narratif\":\"Retour aux racines et réappropriation du temps\",\"valeurs_connectees\":[\"Famille et loyauté\",\"Liberté radicale\"],\"lexique_recommande\":[\"Liberté\",\"Équilibre\",\"Fluide\",\"Temps\",\"Micro-monde\"],\"ton_requis\":\"Personnel mais pas intime, inspirant et réaliste\",\"structure_recommandee\":\"Situation actuelle > motivations > défis > solutions > vision\",\"longueur_cible\":\"400-900 caractères\"}",
+            "Agent": "Lifestyle & Terrain",
+            "Format": "Post LinkedIn lifestyle"
+          },
+          {
+            "Date": "17/10/2025",
+            "Heure": "09h15",
+            "Brief": "{\"angle\":\"Construction chronologique de l'écosystème\",\"instruction\":\"Timeline des créations d'entreprises, logique de diversification, synergies développées étape par étape\",\"source_contenu\":\"Goodtime BNB → Quozyli → Opaline → Cledicihome/MMG → Valya Expérience → HostProtect → Blackcore AI\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Bâtir un empire d'entreprises interconnectées\",\"Vision\"],\"lexique_recommande\":[\"Stratégie\",\"Roadmap\",\"Synergie\",\"Architecture système\",\"Scalabilité\"],\"ton_requis\":\"Pédagogique et stratégique, montrer la logique de construction\",\"structure_recommandee\":\"Slide 1: Vue d'ensemble > Slides 2-6: Chronologie avec logique > Slide 7: Perspective future\",\"specifications_visuelles\":\"Timeline visuelle, logos entreprises, flèches progression, chiffres clés\"}",
+            "Agent": "Tech & Business",
+            "Format": "Carrousel LinkedIn détaillé"
+          },
+          {
+            "Date": "18/10/2025",
+            "Heure": "18h00",
+            "Brief": "{\"angle\":\"Vision prospective IA/emploi\",\"instruction\":\"Interview format question/réponse, Martin développe sa vision transformation vs destruction emplois\",\"source_contenu\":\"Vision 10 ans : automatiser sans humains pour maximiser créativité, équilibre technologie/social\",\"pilier_narratif\":\"IA & libération humaine\",\"valeurs_connectees\":[\"Vision à 10 ans\",\"Jamais de posture de victime\"],\"format_technique\":{\"duree\":\"8 minutes\",\"style\":\"Interview face caméra\",\"elements_requis\":[\"3 angles caméra\",\"sous-titres\",\"extraits courts pour réseaux\"],\"questions_cles\":[\"Impact réel IA sur emploi\",\"Transformation vs destruction\",\"Rôle de l'humain\",\"Prédictions 2025\"],\"qualite\":\"4K\",\"eclairage\":\"Professionnel, setup studio\"},\"structure_video\":\"Intro (30s) > Q1: État actuel (2min) > Q2: Transformation (3min) > Q3: Avenir (2min) > Conclusion (30s)\",\"ton_requis\":\"Expertise crédible, vision claire, éviter la langue de bois\"}",
+            "Agent": "Vidéo Producer",
+            "Format": "Vidéo interview 8 minutes"
+          },
+          {
+            "Date": "21/10/2025",
+            "Heure": "08h30",
+            "Brief": "{\"angle\":\"Philosophie de l'automatisation\",\"instruction\":\"Développer la citation existante de Martin 'Vos process devraient travailler plus dur que vous' en manifeste sur l'intelligence des systèmes vs force brute\",\"source_contenu\":\"Citation Martin : 'Vos process devraient travailler plus dur que vous' + vision automatisation intelligente\",\"pilier_narratif\":\"IA & libération humaine\",\"valeurs_connectees\":[\"Automatiser au maximum\",\"Efficacité\"],\"lexique_recommande\":[\"Process invisible\",\"Intelligence\",\"Automatisation intelligente\",\"Effet levier\",\"Temps libéré\"],\"ton_requis\":\"Philosophique mais concret, inspirant et actionnable\",\"structure_recommandee\":\"Citation > explication principe > exemples > application\",\"longueur_cible\":\"800-1300 caractères\"}",
+            "Agent": "Vision",
+            "Format": "Post LinkedIn inspiration"
+          },
+          {
+            "Date": "22/10/2025",
+            "Heure": "09h00",
+            "Brief": "{\"angle\":\"Patterns d'échec des PME\",\"instruction\":\"Synthèse des erreurs récurrentes observées dans le conseil Martin, solutions concrètes testées dans son écosystème\",\"source_contenu\":\"Expérience conseil stratégique Martin, observations terrain, solutions appliquées dans écosystème\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Concret\",\"Terrain\",\"Solution\"],\"lexique_recommande\":[\"Résilience business\",\"Stratégie\",\"Performance\",\"Optimisation\",\"Transformation\"],\"ton_requis\":\"Expertise terrain, factuel et solution-oriented\",\"structure_recommandee\":\"Thread 7 tweets : Intro choc > Erreur 1 + solution > Erreur 2 + solution > Erreur 3 + solution > Conclusion actionnable\",\"longueur_cible\":\"280 caractères par tweet\"}",
+            "Agent": "Tech & Business",
+            "Format": "Thread Twitter insights"
+          },
+          {
+            "Date": "23/10/2025",
+            "Heure": "08h45",
+            "Brief": "{\"angle\":\"Apprentissage non-conventionnel\",\"instruction\":\"Raconter l'apprentissage à la montagne auprès de figures fortes et marginales, transmission savoir ancien applicable au business\",\"source_contenu\":\"Apprentissage à la montagne auprès de figures fortes et marginales, transmission des savoirs anciens\",\"pilier_narratif\":\"Retour aux racines et réappropriation du temps\",\"valeurs_connectees\":[\"Transmission des savoirs anciens\",\"Travail ancré\"],\"lexique_recommande\":[\"Transmission\",\"Terrain\",\"Brut\",\"Monde réel\",\"Personnage atypique\"],\"ton_requis\":\"Narratif respectueux, connecté aux valeurs anciennes\",\"structure_recommandee\":\"Mise en situation montagne > personnages rencontrés > leçons apprises > application business\",\"longueur_cible\":\"400-900 caractères\"}",
+            "Agent": "Lifestyle & Terrain",
+            "Format": "Post LinkedIn storytelling"
+          },
+          {
+            "Date": "24/10/2025",
+            "Heure": "09h15",
+            "Brief": "{\"angle\":\"Opportunités concrètes Web3 pour PME\",\"instruction\":\"Identifier applications pratiques Web3 dans business traditionnels, éviter le hype, focus ROI et praticité\",\"source_contenu\":\"Vision technologies émergentes, approche pragmatique innovation, expérience Blackcore AI\",\"pilier_narratif\":\"Vision philosophique du monde\",\"valeurs_connectees\":[\"Innovation\",\"Concret\",\"Vision\"],\"lexique_recommande\":[\"Innovation\",\"Transformation\",\"Avantage compétitif\",\"Modèle reproductible\",\"Stratégie\"],\"ton_requis\":\"Analytique pragmatique, éviter le hype tech\",\"structure_recommandee\":\"Slide 1: État actuel Web3 > Slides 2-4: Opportunités concrètes > Slide 5: Comment commencer\",\"specifications_visuelles\":\"Graphiques ROI, exemples secteurs, étapes implementation\"}",
+            "Agent": "Tech & Business",
+            "Format": "Carrousel analyse marché"
+          },
+          {
+            "Date": "25/10/2025",
+            "Heure": "18h00",
+            "Brief": "{\"angle\":\"Coulisses multi-entreprises\",\"instruction\":\"Journée type Martin visitant ses différentes entreprises, montrer concrètement l'écosystème en action\",\"source_contenu\":\"Goodtime BNB, MMG, bureaux Blackcore AI, interactions équipes, prises de décision\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Écosystème\",\"Concret\",\"Terrain\"],\"format_technique\":{\"duree\":\"90 secondes\",\"style\":\"Documentaire coulisses\",\"elements_requis\":[\"Plans séquences\",\"voix off Martin\",\"musique corporate moderne\"],\"lieux_tournage\":[\"Bureaux différentes entreprises\",\"Réunions équipes\",\"Espaces de travail\"],\"transitions\":\"Rapides entre entreprises\",\"qualite\":\"4K\"},\"structure_video\":\"Intro ecosystème (10s) > Visite entreprise 1 (25s) > Entreprise 2 (25s) > Entreprise 3 (25s) > Vue d'ensemble (5s)\",\"ton_requis\":\"Professionnel mais accessible, montrer la réalité du terrain\"}",
+            "Agent": "Vidéo Producer",
+            "Format": "Reel coulisses/documentaire"
+          },
+          {
+            "Date": "28/10/2025",
+            "Heure": "08h30",
+            "Brief": "{\"angle\":\"Philosophie de la création de valeur\",\"instruction\":\"Développer la citation existante de Martin 'L'argent suit la valeur, pas l'inverse' en principe fondamental, connecter avec automatisation comme créateur de valeur\",\"source_contenu\":\"Citation Martin : 'L'argent suit la valeur, pas l'inverse' + philosophie business + automatisation créatrice de valeur\",\"pilier_narratif\":\"Vision philosophique du monde\",\"valeurs_connectees\":[\"Valeur\",\"Impact\",\"Solution\"],\"lexique_recommande\":[\"Valeur\",\"Impact\",\"Solution\",\"Transformation\",\"Vision opérationnelle\"],\"ton_requis\":\"Manifeste inspirant mais ancré dans le concret\",\"structure_recommandee\":\"Citation > principe fondamental > exemples concrets > call to reflection\",\"longueur_cible\":\"800-1300 caractères\"}",
+            "Agent": "Vision",
+            "Format": "Post LinkedIn manifeste"
+          },
+          {
+            "Date": "29/10/2025",
+            "Heure": "09h00",
+            "Brief": "{\"angle\":\"Guide achat IA pour PME\",\"instruction\":\"Sélection outils testés par Martin, budgets transparents, ROI calculé, étapes d'implémentation concrètes\",\"source_contenu\":\"Tests Blackcore AI, retours clients, analyse coût/bénéfice, outils recommandés avec expérience terrain\",\"pilier_narratif\":\"IA & libération humaine\",\"valeurs_connectees\":[\"IA conviviale\",\"ROI\",\"Concret\"],\"lexique_recommande\":[\"ROI\",\"Gains mesurables\",\"IA conviviale\",\"Implémentation\",\"Performance\"],\"ton_requis\":\"Guide pratique ultra-concret, chiffres réels, éviter le marketing\",\"structure_recommandee\":\"Thread 8 tweets : Intro > Outil 1 (coût+ROI) > Outil 2 > Outil 3 > Outil 4 > Outil 5 > Étapes démarrage > CTA\",\"longueur_cible\":\"280 caractères par tweet\"}",
+            "Agent": "Tech & Business",
+            "Format": "Thread Twitter pratique"
+          },
+          {
+            "Date": "30/10/2025",
+            "Heure": "08h45",
+            "Brief": "{\"angle\":\"Équilibre famille/business\",\"instruction\":\"Témoignage authentique sur conciliation rôle père et entrepreneur multi-entreprises, rôle crucial de l'automatisation\",\"source_contenu\":\"Marié, père d'un fils et d'une fille, famille comme valeur fondamentale, automatisation pour libérer temps famille\",\"pilier_narratif\":\"Spiritualité simple et incarnée\",\"valeurs_connectees\":[\"Famille et loyauté\",\"Équilibre\",\"Temps libéré\"],\"lexique_recommande\":[\"Équilibre\",\"Famille\",\"Temps\",\"Fluide\",\"Aligné\"],\"ton_requis\":\"Personnel et authentique sans être intime, inspirant pour d'autres parents entrepreneurs\",\"structure_recommandee\":\"Constat (stress zéro) > méthodes concrètes > rôle automatisation > vision équilibre\",\"longueur_cible\":\"400-900 caractères\"}",
+            "Agent": "Lifestyle & Terrain",
+            "Format": "Post LinkedIn personnel"
+          },
+          {
+            "Date": "31/10/2025",
+            "Heure": "09h15",
+            "Brief": "{\"angle\":\"Bilan chiffré mois d'automatisation\",\"instruction\":\"Métriques réelles du mois octobre, gains temps/argent mesurés, échecs et succès en transparence, apprentissages concrets\",\"source_contenu\":\"Données réelles d'automatisation octobre 2025, métriques business, ROI calculé, témoignages équipes\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Gains mesurables\",\"Performance\",\"Transparence\"],\"lexique_recommande\":[\"ROI\",\"Gains mesurables\",\"Performance\",\"Optimisation\",\"Bilan\"],\"ton_requis\":\"Factuel et transparent, montrer succès ET échecs\",\"structure_recommandee\":\"Slide 1: Vue d'ensemble > Slides 2-4: Métriques par secteur > Slide 5: Échecs et apprentissages > Slide 6: Perspectives\",\"specifications_visuelles\":\"Graphiques évolution, tableaux métriques, avant/après, pourcentages\"}",
+            "Agent": "Tech & Business",
+            "Format": "Carrousel résultats"
+          },
+          {
+            "Date": "01/11/2025",
+            "Heure": "18h00",
+            "Brief": "{\"angle\":\"Vision prospective 2025\",\"instruction\":\"Message personnel de Martin, 3 prédictions argumentées sur évolution entrepreneuriat/IA/automatisation basées sur son expérience\",\"source_contenu\":\"Vision 10 ans Martin, tendances observées dans écosystème, évolution business et IA\",\"pilier_narratif\":\"Vision philosophique du monde\",\"valeurs_connectees\":[\"Vision\",\"Transformation\",\"Leadership\"],\"format_technique\":{\"duree\":\"5 minutes\",\"style\":\"Message personnel face caméra\",\"elements_requis\":[\"éclairage doux\",\"sous-titres\",\"extraits partageables\"],\"structure\":\"3 prédictions distinctes avec arguments\",\"ambiance\":\"Intimiste mais professionnel\",\"qualite\":\"4K\"},\"structure_video\":\"Intro personnelle (30s) > Prédiction 1 (90s) > Prédiction 2 (90s) > Prédiction 3 (90s) > Message final (30s)\",\"ton_requis\":\"Visionnaire et inspirant, crédible basé sur l'expérience\"}",
+            "Agent": "Vidéo Producer",
+            "Format": "Vidéo message 5 minutes"
+          }
+        ]
+      }
+    ],
+    "Split Out": [
+      {
+        "Date": "07/10/2025",
+        "Heure": "08h30",
+        "Brief": "{\"angle\":\"L'IA comme multiplicateur d'entrepreneur\",\"instruction\":\"Développer la citation existante de Martin en post inspirant sur la transformation des menaces en opportunités. Utiliser le vocabulaire naturel Martin : 'vision', 'transformation', 'émancipation'\",\"source_contenu\":\"Citation Martin existante: 'L'IA ne remplacera jamais un bon entrepreneur. Mais un bon entrepreneur qui utilise l'IA remplacera beaucoup de concurrents.' + vision liberté radicale\",\"pilier_narratif\":\"IA & libération humaine\",\"valeurs_connectees\":[\"Liberté radicale\",\"Vision à 10 ans\"],\"lexique_recommande\":[\"Automatisation intelligente\",\"Transformation\",\"Avantage compétitif\",\"Vision opérationnelle\"],\"ton_requis\":\"Tranchant, incarné, sans fioriture. Jamais édulcoré, jamais racoleur\",\"structure_recommandee\":\"Accroche > contexte > leçon > ouverture\",\"longueur_cible\":\"800-1300 caractères\"}",
+        "Agent": "Vision",
+        "Format": "Post LinkedIn long-form"
+      },
+      {
+        "Date": "08/10/2025",
+        "Heure": "09h00",
+        "Brief": "{\"angle\":\"ROI concret de l'automatisation\",\"instruction\":\"Présenter des chiffres réels d'automatisation dans l'écosystème Martin, focus efficacité mesurable. Utiliser données concrètes et éviter le blabla marketing\",\"source_contenu\":\"Implémentation IA dans Blackcore AI et autres entreprises de l'écosystème Martin\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Automatiser au maximum, sans humains, pour maximiser la créativité\"],\"lexique_recommande\":[\"ROI\",\"Gains mesurables\",\"Process invisible\",\"Scalabilité\",\"Efficacité augmentée\"],\"ton_requis\":\"Analytique avec données précises, éviter corporate/marketing conventionnel\",\"structure_recommandee\":\"Thread 5-7 tweets avec métriques progressives\",\"longueur_cible\":\"600-1200 caractères par tweet\"}",
+        "Agent": "Tech & Business",
+        "Format": "Thread Twitter avec données"
+      },
+      {
+        "Date": "09/10/2025",
+        "Heure": "08h45",
+        "Brief": "{\"angle\":\"L'échec comme fondation du succès\",\"instruction\":\"Raconter le parcours scolaire chaotique de Martin et comment ça a forgé l'entrepreneur autodidacte. Utiliser l'anecdote du refus du formatage\",\"source_contenu\":\"Parcours scolaire chaotique, renvois, internats, abandon en seconde. Anecdote : 'J'ai quitté l'école très tôt. Ce n'était pas un rejet de l'apprentissage, mais du conditionnement.'\",\"pilier_narratif\":\"Retour aux racines et réappropriation du temps\",\"valeurs_connectees\":[\"Jamais de posture de victime\",\"Travail ancré\"],\"lexique_recommande\":[\"Bourlinguer\",\"Personnage atypique\",\"Monde réel\",\"Prendre des risques\",\"Émancipation\"],\"ton_requis\":\"Narratif incarné, authentique, connecté au réel\",\"structure_recommandee\":\"Anecdote personnelle > enchaînement vers vision du monde > leçon > CTA implicite\",\"longueur_cible\":\"400-900 caractères\"}",
+        "Agent": "Lifestyle & Terrain",
+        "Format": "Post LinkedIn narratif"
+      },
+      {
+        "Date": "10/10/2025",
+        "Heure": "09h15",
+        "Brief": "{\"angle\":\"Synergies concrètes entre entreprises\",\"instruction\":\"Schématiser les connexions entre Goodtime BNB, HostProtect, MMG, Blackcore AI avec flux clients/données. Montrer la logique de l'écosystème\",\"source_contenu\":\"Écosystème complet: Goodtime BNB → HostProtect → MMG → Blackcore AI avec synergies location saisonnière → assurance → conciergerie → IA\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Bâtir un empire d'entreprises interconnectées\"],\"lexique_recommande\":[\"Synergie\",\"Écosystème\",\"Flux de travail\",\"Architecture système\",\"Modèle reproductible\"],\"ton_requis\":\"Pédagogique et concret, focus sur l'aspect systémique\",\"structure_recommandee\":\"Slide 1: Concept > Slides 2-4: Exemples concrets > Slide 5: Application\",\"specifications_visuelles\":\"Schémas avec flèches, icônes entreprises, flux de données\"}",
+        "Agent": "Tech & Business",
+        "Format": "Carrousel LinkedIn 5 slides"
+      },
+      {
+        "Date": "11/10/2025",
+        "Heure": "18h00",
+        "Brief": "{\"angle\":\"Automatisation éthique en action\",\"instruction\":\"Script 60 secondes montrant Martin dans son quotidien, alternance tâches automatisées/moments famille\",\"source_contenu\":\"Quotidien entre Italie/Bulgarie, père de famille (fils et fille), automatisation pour libérer temps créatif\",\"pilier_narratif\":\"Spiritualité simple et incarnée\",\"valeurs_connectees\":[\"Famille et loyauté\",\"Temps libéré\"],\"format_technique\":{\"duree\":\"60 secondes\",\"style\":\"Montage dynamique\",\"elements_requis\":[\"sous-titres\",\"musique énergique\",\"plans courts\"],\"lieux_tournage\":[\"Bureau/workspace\",\"Moments famille\",\"Outils automatisation\"],\"ratio\":\"9:16 (vertical)\",\"qualite\":\"1080p minimum\"},\"structure_video\":\"Intro punch (3s) > Démonstration automatisation (40s) > Moment famille (12s) > CTA (5s)\",\"ton_requis\":\"Authentique, rythmé, pas de mise en scène artificielle\"}",
+        "Agent": "Vidéo Producer",
+        "Format": "Reel Instagram/TikTok"
+      },
+      {
+        "Date": "14/10/2025",
+        "Heure": "08h30",
+        "Brief": "{\"angle\":\"Réalisme sur l'entrepreneuriat\",\"instruction\":\"Déconstruire les mythes de la liberté facile, parler du prix réel de l'autonomie économique sans posture de victime\",\"source_contenu\":\"Valeurs fondamentales : liberté radicale mais avec travail ancré, jamais de posture de victime\",\"pilier_narratif\":\"IA & libération humaine\",\"valeurs_connectees\":[\"Liberté radicale\",\"Travail ancré\",\"Autonomie économique\"],\"lexique_recommande\":[\"Émancipation\",\"Temps\",\"Risque calculé\",\"Concret\",\"Terrain\"],\"ton_requis\":\"Tranchant, direct, réaliste sans décourager\",\"structure_recommandee\":\"Déconstruction mythe > réalité terrain > encouragement action\",\"longueur_cible\":\"800-1300 caractères\"}",
+        "Agent": "Vision",
+        "Format": "Post LinkedIn tranchant"
+      },
+      {
+        "Date": "15/10/2025",
+        "Heure": "09h00",
+        "Brief": "{\"angle\":\"Métriques concrètes IA business\",\"instruction\":\"Données chiffrées sur implémentation IA, coûts cachés, délais réels, erreurs communes. Éviter le marketing et donner du concret\",\"source_contenu\":\"Expérience Blackcore AI, implémentation IA dans écosystème Martin, retours clients\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Concret\",\"ROI\",\"Performance\"],\"lexique_recommande\":[\"ROI\",\"Gains mesurables\",\"Optimisation\",\"Performance\",\"IA conviviale\"],\"ton_requis\":\"Analytique précis, données factuelles, éviter le corporate\",\"structure_recommandee\":\"Thread 6-8 tweets : métriques cachées > coûts réels > délais > erreurs > solutions\",\"longueur_cible\":\"280 caractères par tweet\"}",
+        "Agent": "Tech & Business",
+        "Format": "Thread Twitter analytique"
+      },
+      {
+        "Date": "16/10/2025",
+        "Heure": "08h45",
+        "Brief": "{\"angle\":\"Liberté géographique et business\",\"instruction\":\"Expliquer le choix de vie nomade, impact sur famille et business, automatisation comme facilitateur\",\"source_contenu\":\"Vie entre Italie et Bulgarie, marié père de 2 enfants (fils et fille), écosystème business automatisé\",\"pilier_narratif\":\"Retour aux racines et réappropriation du temps\",\"valeurs_connectees\":[\"Famille et loyauté\",\"Liberté radicale\"],\"lexique_recommande\":[\"Liberté\",\"Équilibre\",\"Fluide\",\"Temps\",\"Micro-monde\"],\"ton_requis\":\"Personnel mais pas intime, inspirant et réaliste\",\"structure_recommandee\":\"Situation actuelle > motivations > défis > solutions > vision\",\"longueur_cible\":\"400-900 caractères\"}",
+        "Agent": "Lifestyle & Terrain",
+        "Format": "Post LinkedIn lifestyle"
+      },
+      {
+        "Date": "17/10/2025",
+        "Heure": "09h15",
+        "Brief": "{\"angle\":\"Construction chronologique de l'écosystème\",\"instruction\":\"Timeline des créations d'entreprises, logique de diversification, synergies développées étape par étape\",\"source_contenu\":\"Goodtime BNB → Quozyli → Opaline → Cledicihome/MMG → Valya Expérience → HostProtect → Blackcore AI\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Bâtir un empire d'entreprises interconnectées\",\"Vision\"],\"lexique_recommande\":[\"Stratégie\",\"Roadmap\",\"Synergie\",\"Architecture système\",\"Scalabilité\"],\"ton_requis\":\"Pédagogique et stratégique, montrer la logique de construction\",\"structure_recommandee\":\"Slide 1: Vue d'ensemble > Slides 2-6: Chronologie avec logique > Slide 7: Perspective future\",\"specifications_visuelles\":\"Timeline visuelle, logos entreprises, flèches progression, chiffres clés\"}",
+        "Agent": "Tech & Business",
+        "Format": "Carrousel LinkedIn détaillé"
+      },
+      {
+        "Date": "18/10/2025",
+        "Heure": "18h00",
+        "Brief": "{\"angle\":\"Vision prospective IA/emploi\",\"instruction\":\"Interview format question/réponse, Martin développe sa vision transformation vs destruction emplois\",\"source_contenu\":\"Vision 10 ans : automatiser sans humains pour maximiser créativité, équilibre technologie/social\",\"pilier_narratif\":\"IA & libération humaine\",\"valeurs_connectees\":[\"Vision à 10 ans\",\"Jamais de posture de victime\"],\"format_technique\":{\"duree\":\"8 minutes\",\"style\":\"Interview face caméra\",\"elements_requis\":[\"3 angles caméra\",\"sous-titres\",\"extraits courts pour réseaux\"],\"questions_cles\":[\"Impact réel IA sur emploi\",\"Transformation vs destruction\",\"Rôle de l'humain\",\"Prédictions 2025\"],\"qualite\":\"4K\",\"eclairage\":\"Professionnel, setup studio\"},\"structure_video\":\"Intro (30s) > Q1: État actuel (2min) > Q2: Transformation (3min) > Q3: Avenir (2min) > Conclusion (30s)\",\"ton_requis\":\"Expertise crédible, vision claire, éviter la langue de bois\"}",
+        "Agent": "Vidéo Producer",
+        "Format": "Vidéo interview 8 minutes"
+      },
+      {
+        "Date": "21/10/2025",
+        "Heure": "08h30",
+        "Brief": "{\"angle\":\"Philosophie de l'automatisation\",\"instruction\":\"Développer la citation existante de Martin 'Vos process devraient travailler plus dur que vous' en manifeste sur l'intelligence des systèmes vs force brute\",\"source_contenu\":\"Citation Martin : 'Vos process devraient travailler plus dur que vous' + vision automatisation intelligente\",\"pilier_narratif\":\"IA & libération humaine\",\"valeurs_connectees\":[\"Automatiser au maximum\",\"Efficacité\"],\"lexique_recommande\":[\"Process invisible\",\"Intelligence\",\"Automatisation intelligente\",\"Effet levier\",\"Temps libéré\"],\"ton_requis\":\"Philosophique mais concret, inspirant et actionnable\",\"structure_recommandee\":\"Citation > explication principe > exemples > application\",\"longueur_cible\":\"800-1300 caractères\"}",
+        "Agent": "Vision",
+        "Format": "Post LinkedIn inspiration"
+      },
+      {
+        "Date": "22/10/2025",
+        "Heure": "09h00",
+        "Brief": "{\"angle\":\"Patterns d'échec des PME\",\"instruction\":\"Synthèse des erreurs récurrentes observées dans le conseil Martin, solutions concrètes testées dans son écosystème\",\"source_contenu\":\"Expérience conseil stratégique Martin, observations terrain, solutions appliquées dans écosystème\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Concret\",\"Terrain\",\"Solution\"],\"lexique_recommande\":[\"Résilience business\",\"Stratégie\",\"Performance\",\"Optimisation\",\"Transformation\"],\"ton_requis\":\"Expertise terrain, factuel et solution-oriented\",\"structure_recommandee\":\"Thread 7 tweets : Intro choc > Erreur 1 + solution > Erreur 2 + solution > Erreur 3 + solution > Conclusion actionnable\",\"longueur_cible\":\"280 caractères par tweet\"}",
+        "Agent": "Tech & Business",
+        "Format": "Thread Twitter insights"
+      },
+      {
+        "Date": "23/10/2025",
+        "Heure": "08h45",
+        "Brief": "{\"angle\":\"Apprentissage non-conventionnel\",\"instruction\":\"Raconter l'apprentissage à la montagne auprès de figures fortes et marginales, transmission savoir ancien applicable au business\",\"source_contenu\":\"Apprentissage à la montagne auprès de figures fortes et marginales, transmission des savoirs anciens\",\"pilier_narratif\":\"Retour aux racines et réappropriation du temps\",\"valeurs_connectees\":[\"Transmission des savoirs anciens\",\"Travail ancré\"],\"lexique_recommande\":[\"Transmission\",\"Terrain\",\"Brut\",\"Monde réel\",\"Personnage atypique\"],\"ton_requis\":\"Narratif respectueux, connecté aux valeurs anciennes\",\"structure_recommandee\":\"Mise en situation montagne > personnages rencontrés > leçons apprises > application business\",\"longueur_cible\":\"400-900 caractères\"}",
+        "Agent": "Lifestyle & Terrain",
+        "Format": "Post LinkedIn storytelling"
+      },
+      {
+        "Date": "24/10/2025",
+        "Heure": "09h15",
+        "Brief": "{\"angle\":\"Opportunités concrètes Web3 pour PME\",\"instruction\":\"Identifier applications pratiques Web3 dans business traditionnels, éviter le hype, focus ROI et praticité\",\"source_contenu\":\"Vision technologies émergentes, approche pragmatique innovation, expérience Blackcore AI\",\"pilier_narratif\":\"Vision philosophique du monde\",\"valeurs_connectees\":[\"Innovation\",\"Concret\",\"Vision\"],\"lexique_recommande\":[\"Innovation\",\"Transformation\",\"Avantage compétitif\",\"Modèle reproductible\",\"Stratégie\"],\"ton_requis\":\"Analytique pragmatique, éviter le hype tech\",\"structure_recommandee\":\"Slide 1: État actuel Web3 > Slides 2-4: Opportunités concrètes > Slide 5: Comment commencer\",\"specifications_visuelles\":\"Graphiques ROI, exemples secteurs, étapes implementation\"}",
+        "Agent": "Tech & Business",
+        "Format": "Carrousel analyse marché"
+      },
+      {
+        "Date": "25/10/2025",
+        "Heure": "18h00",
+        "Brief": "{\"angle\":\"Coulisses multi-entreprises\",\"instruction\":\"Journée type Martin visitant ses différentes entreprises, montrer concrètement l'écosystème en action\",\"source_contenu\":\"Goodtime BNB, MMG, bureaux Blackcore AI, interactions équipes, prises de décision\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Écosystème\",\"Concret\",\"Terrain\"],\"format_technique\":{\"duree\":\"90 secondes\",\"style\":\"Documentaire coulisses\",\"elements_requis\":[\"Plans séquences\",\"voix off Martin\",\"musique corporate moderne\"],\"lieux_tournage\":[\"Bureaux différentes entreprises\",\"Réunions équipes\",\"Espaces de travail\"],\"transitions\":\"Rapides entre entreprises\",\"qualite\":\"4K\"},\"structure_video\":\"Intro ecosystème (10s) > Visite entreprise 1 (25s) > Entreprise 2 (25s) > Entreprise 3 (25s) > Vue d'ensemble (5s)\",\"ton_requis\":\"Professionnel mais accessible, montrer la réalité du terrain\"}",
+        "Agent": "Vidéo Producer",
+        "Format": "Reel coulisses/documentaire"
+      },
+      {
+        "Date": "28/10/2025",
+        "Heure": "08h30",
+        "Brief": "{\"angle\":\"Philosophie de la création de valeur\",\"instruction\":\"Développer la citation existante de Martin 'L'argent suit la valeur, pas l'inverse' en principe fondamental, connecter avec automatisation comme créateur de valeur\",\"source_contenu\":\"Citation Martin : 'L'argent suit la valeur, pas l'inverse' + philosophie business + automatisation créatrice de valeur\",\"pilier_narratif\":\"Vision philosophique du monde\",\"valeurs_connectees\":[\"Valeur\",\"Impact\",\"Solution\"],\"lexique_recommande\":[\"Valeur\",\"Impact\",\"Solution\",\"Transformation\",\"Vision opérationnelle\"],\"ton_requis\":\"Manifeste inspirant mais ancré dans le concret\",\"structure_recommandee\":\"Citation > principe fondamental > exemples concrets > call to reflection\",\"longueur_cible\":\"800-1300 caractères\"}",
+        "Agent": "Vision",
+        "Format": "Post LinkedIn manifeste"
+      },
+      {
+        "Date": "29/10/2025",
+        "Heure": "09h00",
+        "Brief": "{\"angle\":\"Guide achat IA pour PME\",\"instruction\":\"Sélection outils testés par Martin, budgets transparents, ROI calculé, étapes d'implémentation concrètes\",\"source_contenu\":\"Tests Blackcore AI, retours clients, analyse coût/bénéfice, outils recommandés avec expérience terrain\",\"pilier_narratif\":\"IA & libération humaine\",\"valeurs_connectees\":[\"IA conviviale\",\"ROI\",\"Concret\"],\"lexique_recommande\":[\"ROI\",\"Gains mesurables\",\"IA conviviale\",\"Implémentation\",\"Performance\"],\"ton_requis\":\"Guide pratique ultra-concret, chiffres réels, éviter le marketing\",\"structure_recommandee\":\"Thread 8 tweets : Intro > Outil 1 (coût+ROI) > Outil 2 > Outil 3 > Outil 4 > Outil 5 > Étapes démarrage > CTA\",\"longueur_cible\":\"280 caractères par tweet\"}",
+        "Agent": "Tech & Business",
+        "Format": "Thread Twitter pratique"
+      },
+      {
+        "Date": "30/10/2025",
+        "Heure": "08h45",
+        "Brief": "{\"angle\":\"Équilibre famille/business\",\"instruction\":\"Témoignage authentique sur conciliation rôle père et entrepreneur multi-entreprises, rôle crucial de l'automatisation\",\"source_contenu\":\"Marié, père d'un fils et d'une fille, famille comme valeur fondamentale, automatisation pour libérer temps famille\",\"pilier_narratif\":\"Spiritualité simple et incarnée\",\"valeurs_connectees\":[\"Famille et loyauté\",\"Équilibre\",\"Temps libéré\"],\"lexique_recommande\":[\"Équilibre\",\"Famille\",\"Temps\",\"Fluide\",\"Aligné\"],\"ton_requis\":\"Personnel et authentique sans être intime, inspirant pour d'autres parents entrepreneurs\",\"structure_recommandee\":\"Constat (stress zéro) > méthodes concrètes > rôle automatisation > vision équilibre\",\"longueur_cible\":\"400-900 caractères\"}",
+        "Agent": "Lifestyle & Terrain",
+        "Format": "Post LinkedIn personnel"
+      },
+      {
+        "Date": "31/10/2025",
+        "Heure": "09h15",
+        "Brief": "{\"angle\":\"Bilan chiffré mois d'automatisation\",\"instruction\":\"Métriques réelles du mois octobre, gains temps/argent mesurés, échecs et succès en transparence, apprentissages concrets\",\"source_contenu\":\"Données réelles d'automatisation octobre 2025, métriques business, ROI calculé, témoignages équipes\",\"pilier_narratif\":\"Multientrepreneuriat et systèmes interconnectés\",\"valeurs_connectees\":[\"Gains mesurables\",\"Performance\",\"Transparence\"],\"lexique_recommande\":[\"ROI\",\"Gains mesurables\",\"Performance\",\"Optimisation\",\"Bilan\"],\"ton_requis\":\"Factuel et transparent, montrer succès ET échecs\",\"structure_recommandee\":\"Slide 1: Vue d'ensemble > Slides 2-4: Métriques par secteur > Slide 5: Échecs et apprentissages > Slide 6: Perspectives\",\"specifications_visuelles\":\"Graphiques évolution, tableaux métriques, avant/après, pourcentages\"}",
+        "Agent": "Tech & Business",
+        "Format": "Carrousel résultats"
+      },
+      {
+        "Date": "01/11/2025",
+        "Heure": "18h00",
+        "Brief": "{\"angle\":\"Vision prospective 2025\",\"instruction\":\"Message personnel de Martin, 3 prédictions argumentées sur évolution entrepreneuriat/IA/automatisation basées sur son expérience\",\"source_contenu\":\"Vision 10 ans Martin, tendances observées dans écosystème, évolution business et IA\",\"pilier_narratif\":\"Vision philosophique du monde\",\"valeurs_connectees\":[\"Vision\",\"Transformation\",\"Leadership\"],\"format_technique\":{\"duree\":\"5 minutes\",\"style\":\"Message personnel face caméra\",\"elements_requis\":[\"éclairage doux\",\"sous-titres\",\"extraits partageables\"],\"structure\":\"3 prédictions distinctes avec arguments\",\"ambiance\":\"Intimiste mais professionnel\",\"qualite\":\"4K\"},\"structure_video\":\"Intro personnelle (30s) > Prédiction 1 (90s) > Prédiction 2 (90s) > Prédiction 3 (90s) > Message final (30s)\",\"ton_requis\":\"Visionnaire et inspirant, crédible basé sur l'expérience\"}",
+        "Agent": "Vidéo Producer",
+        "Format": "Vidéo message 5 minutes"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b90d30a6879f8130f189ef0684578477b9e5cce9c1208eaeb8db84307d3841be"
+  }
+}

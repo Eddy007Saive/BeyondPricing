@@ -49,7 +49,11 @@ export  function Calendrier() {
         });
 
         const logementsData = response.data.logements;
-        setLogements(logementsData);
+        const logementNotEmpty=logementsData.filter(logement => logement.tableScoringJournalier!="");
+        setLogements(logementNotEmpty);
+
+        console.log(logementsData);
+        
 
         // Sélectionner le premier logement par défaut
         if (logementsData.length > 0 && !selectedLogement) {

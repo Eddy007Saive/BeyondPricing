@@ -143,7 +143,7 @@ export const getLogements = async (params = {}) => {
       country: record.fields["country"] || "",
       state: record.fields["state"] || "",
       nbrLit: record.fields["Nbr_lit"] || 0,
-      tableScoringJournalier: record.fields["Table_Scoring_Journalier"] || "",
+      tableScoringJournalier: record.fields["Table_Scoring_Journalier 2"] || "",
       roomType: record.fields["roomType"] || "",
       nbrChambre: record.fields["Nbr_chambre"] || 0,
       minStay: record.fields["minStay"] || 0,
