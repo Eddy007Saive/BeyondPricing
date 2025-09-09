@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit3, Save, X, Filter, ArrowUpDown, MapPin, Home, Users, Bed, DollarSign, Eye, Settings, MoreHorizontal, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import { getLogements } from '@/services/Logement';
+import { getLogements,updateLogement } from '@/services/Logement';
 
 
 const mockUpdateLogement = async (id, data) => {
@@ -76,7 +76,7 @@ export const Liste = () => {
   const handleSaveCell = async (logementId, field) => {
     try {
       const updateData = { [field]: editingValue };
-      await mockUpdateLogement(logementId, updateData); // Remplacez par updateLogement
+      await updateLogement(logementId, updateData); 
       
       // Mettre à jour localement
       setLogements(prev => prev.map(logement => 
