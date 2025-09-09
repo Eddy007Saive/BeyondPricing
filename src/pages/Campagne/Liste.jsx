@@ -1,263 +1,458 @@
-import React, { useEffect, useState } from "react";
-import {
-    Card,
-    CardHeader,
-    CardBody,
-    Typography,
-    Chip,
-    Input,
-    Button,
-    IconButton,
-} from "@material-tailwind/react";
-import { getCampagnes } from "@/services";
-import { Link, useNavigate } from "react-router-dom";
-import Pagination from "@/components/Pagination";
-
-export function liste() {
-    // États pour les données et la pagination
-    const [campagnes, setCampagnes] = useState([]);
-    const [totalItems, setTotalItems] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
-    
-    // États pour les filtres et le tri
-    const [search, setSearch] = useState("");
-    const [limit, setLimit] = useState(10);
-    const [sortBy, setSortBy] = useState("id");
-    const [sortOrder, setSortOrder] = useState("ASC");
-
-    useEffect(() => {
-        fetchData();
-    }, [currentPage, limit, sortBy, sortOrder]); // Rechargement lors du changement de pagination ou tri
-
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            // Construction de l'URL avec tous les paramètres de pagination et filtres
-            const response = await getCampagnes({
-                page: currentPage,
-                limit,
-                search,
-                sortBy,
-                sortOrder
-            });
-            
-            // Mise à jour des états avec les données reçues
-            setCampagnes(response.data.campagnes);
-            setTotalItems(response.data.totalItems);
-            setTotalPages(response.data.totalPages);
-            setLoading(false);
-        } catch (error) {
-            console.error("Erreur lors du chargement des campagnes:", error);
-            setLoading(false);
-        }
-    };
-
-    // Fonction pour effectuer une recherche
-    const handleSearch = (e) => {
-        e.preventDefault();
-        setCurrentPage(1); // Retour à la première page lors d'une nouvelle recherche
-        fetchData();
-    };
+import React, { useState, useEffect } from 'react';
+import { Search, Plus, Edit3, Save, X, Filter, ArrowUpDown, MapPin, Home, Users, Bed, DollarSign, Eye, Settings, MoreHorizontal, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { getLogements } from '@/services/Logement';
 
 
+const mockUpdateLogement = async (id, data) => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve({ success: true });
+    }, 300);
+  });
+};
 
-        // Gestionnaire de changement de page pour le composant Pagination
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
+export const Liste = () => {
+  const [logements, setLogements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [sortBy, setSortBy] = useState('nom');
+  const [sortOrder, setSortOrder] = useState('ASC');
+  const [editingCell, setEditingCell] = useState(null);
+  const [editingValue, setEditingValue] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
-    // Gestionnaire de changement de limite par page pour le composant Pagination
-    const handleLimitChange = (newLimit) => {
-        setLimit(newLimit);
-        setCurrentPage(1); 
-    };
+  // États pour la pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [limit] = useState(10);
 
-    // Fonction pour changer le tri
-    const handleSort = (column) => {
-        // Si on clique sur la colonne déjà triée, on inverse l'ordre
-        if (sortBy === column) {
-            setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
-        } else {
-            // Sinon on trie par la nouvelle colonne en ordre ascendant
-            setSortBy(column);
-            setSortOrder("ASC");
-        }
-    };
+  useEffect(() => {
+    fetchLogements();
+  }, [currentPage, searchTerm, filterStatus, sortBy, sortOrder]);
 
-    const columns = [
-        { key: "nom", label: "Nom de la campagne" },
-        { key: "poste", label: "Poste recherché" },
-        { key: "zone", label: "Zone géographique" },
-        { key: "experience", label: "Expérience" },
-        { key: "langues", label: "Langues" },
-        { key: "secteurs", label: "Secteurs" },
-        { key: "statut", label: "Statut" }
-    ];
+  const fetchLogements = async () => {
+    try {
+      setLoading(true);
+      const params = {
+        page: currentPage,
+        limit,
+        search: searchTerm,
+        sortBy,
+        sortOrder
+      };
+      
+      const response = await getLogements(params); // Remplacez par getLogements(params)
+      setLogements(response.data.logements);
+      setTotalPages(response.data.totalPages);
+      setTotalItems(response.data.totalItems);
+    } catch (error) {
+      console.error('Erreur lors du chargement:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-     // Fonction pour naviguer vers le dashboard de la campagne
-     const handleCampaignClick = (campaignId) => {
-        navigate(`/dashboard/campagne/${campaignId}`);
-    };
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
+    } else {
+      setSortBy(column);
+      setSortOrder('ASC');
+    }
+  };
+
+  const handleEditCell = (logementId, field, currentValue) => {
+    setEditingCell(`${logementId}-${field}`);
+    setEditingValue(currentValue || '');
+  };
+
+  const handleSaveCell = async (logementId, field) => {
+    try {
+      const updateData = { [field]: editingValue };
+      await mockUpdateLogement(logementId, updateData); // Remplacez par updateLogement
+      
+      // Mettre à jour localement
+      setLogements(prev => prev.map(logement => 
+        logement.id === logementId 
+          ? { ...logement, [field]: editingValue }
+          : logement
+      ));
+      
+      setEditingCell(null);
+      setEditingValue('');
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCell(null);
+    setEditingValue('');
+  };
+
+  const getStatusIcon = (scrape, predit) => {
+    if (scrape === 'Fait' && predit === 'Oui') {
+      return <CheckCircle className="w-4 h-4 text-green-500" />;
+    } else if (scrape === 'Fait') {
+      return <Clock className="w-4 h-4 text-yellow-500" />;
+    }
+    return <AlertCircle className="w-4 h-4 text-gray-400" />;
+  };
+
+  const getStatusText = (scrape, predit) => {
+    if (scrape === 'Fait' && predit === 'Oui') return 'Optimisé';
+    if (scrape === 'Fait') return 'Analysé';
+    return 'En attente';
+  };
+
+  const EditableCell = ({ logement, field, value, className = "" }) => {
+    const cellId = `${logement.id}-${field}`;
+    const isEditing = editingCell === cellId;
+
+    if (isEditing) {
+      return (
+        <div className="flex items-center space-x-2">
+          <input
+            type="text"
+            value={editingValue}
+            onChange={(e) => setEditingValue(e.target.value)}
+            className="px-2 py-1 border border-blue-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') handleSaveCell(logement.id, field);
+              if (e.key === 'Escape') handleCancelEdit();
+            }}
+            autoFocus
+          />
+          <button
+            onClick={() => handleSaveCell(logement.id, field)}
+            className="p-1 text-green-600 hover:text-green-700"
+          >
+            <Save className="w-3 h-3" />
+          </button>
+          <button
+            onClick={handleCancelEdit}
+            className="p-1 text-red-600 hover:text-red-700"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      );
+    }
 
     return (
-        <div className="mt-12 mb-8 flex flex-col gap-12">
-            <Card>
-                <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
-                    <div className="flex justify-between items-center">
-                        <Typography variant="h6" color="white">
-                            Campagnes
-                        </Typography>
-                        <div>
-                            <Link to="/dashboard/nouvelle/campagne" className="bg-white text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 transition-all">
-                                Nouvelle Campagne
-                            </Link>
-                        </div>
-                    </div>
-                </CardHeader>
-
-                {/* Barre de recherche */}
-                <div className="px-4 py-2">
-                    <form onSubmit={handleSearch} className="flex gap-2">
-                        <div className="w-full">
-                            <Input
-                                type="text"
-                                label="Rechercher une campagne..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
-                        <Button type="submit" color="gray">
-                            Rechercher
-                        </Button>
-                    </form>
-                </div>
-
-                <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-                    {loading ? (
-                        <div className="flex justify-center p-4">
-                            <p>Chargement...</p>
-                        </div>
-                    ) : (
-                        <>
-                            <table className="w-full min-w-[640px] table-auto">
-                                <thead>
-                                    <tr>
-                                        {columns.map((column) => (
-                                            <th
-                                                key={column.key}
-                                                className="border-b border-blue-gray-50 py-3 px-5 text-left cursor-pointer"
-                                                onClick={() => column.key !== "actions" && handleSort(column.key)}
-                                            >
-                                                <div className="flex items-center">
-                                                    <Typography
-                                                        variant="small"
-                                                        className="text-[11px] font-bold uppercase text-blue-gray-400"
-                                                    >
-                                                        {column.label}
-                                                    </Typography>
-                                                    {sortBy === column.key && (
-                                                        <span className="ml-1">
-                                                            {sortOrder === "ASC" ? "↑" : "↓"}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {campagnes.length > 0 ? (
-                                        campagnes.map(({ id, nom, poste, zone, experienceMin, experienceMax, langues, secteurs, statut,lancerCampagne }, key) => {
-                                            const className = `py-3 px-5 ${
-                                                key === campagnes.length - 1 ? "" : "border-b border-blue-gray-50"
-                                            }`;
-
-                                            return (
-                                                <tr key={id}
-                                                className="hover:bg-blue-gray-50 cursor-pointer transition-colors"
-                                                onClick={() => handleCampaignClick(id)}
-                                                >
-                                                    <td className={className}>
-                                                        <div className="flex items-center gap-4">
-                                                            <div>
-                                                                <Typography
-                                                                    variant="small"
-                                                                    color="blue-gray"
-                                                                    className="font-semibold"
-                                                                >
-                                                                    {nom}
-                                                                </Typography>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className={className}>
-                                                        <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                            {poste}
-                                                        </Typography>
-                                                    </td>
-                                                    <td className={className}>
-                                                        <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                            {zone}
-                                                        </Typography>
-                                                    </td>
-                                                    <td className={className}>
-                                                        <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                            {experienceMin}-{experienceMax} ans
-                                                        </Typography>
-                                                    </td>
-                                                    <td className={className}>
-                                                        <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                            {langues}
-                                                        </Typography>
-                                                    </td>
-                                                    <td className={className}>
-                                                        <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                            {secteurs}
-                                                        </Typography>
-                                                    </td>
-                                                    <td className={className}>
-                                                        <Chip
-                                                            variant="gradient"
-                                                            color={statut === "Actif" ? "green" : "gray"}
-                                                            value={statut}
-                                                            className="py-0.5 px-2 text-[11px] font-medium w-fit"
-                                                        />
-                                                    </td>
-                                                 
-                                                </tr>
-                                            );
-                                        })
-                                    ) : (
-                                        <tr>
-                                            <td colSpan={columns.length} className="py-4 px-5 text-center">
-                                                <Typography variant="small" className="text-blue-gray-500">
-                                                    Aucune campagne trouvée
-                                                </Typography>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-
-                            {/* Pagination */}
-                             <Pagination 
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                totalItems={totalItems}
-                                limit={limit}
-                                onPageChange={handlePageChange}
-                                onLimitChange={handleLimitChange}
-                                itemName="campagnes"
-                            />
-                        </>
-                    )}
-                </CardBody>
-            </Card>
+      <div 
+        className={`group cursor-pointer hover:bg-gray-50 px-2 py-1 rounded ${className}`}
+        onClick={() => handleEditCell(logement.id, field, value)}
+      >
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-900">{value || 'Cliquer pour ajouter'}</span>
+          <Edit3 className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
+      </div>
     );
-}
+  };
 
-export default liste;
+  const filteredLogements = logements.filter(logement => {
+    if (filterStatus === 'all') return true;
+    if (filterStatus === 'optimized') return logement.scrape === 'Fait' && logement.predit === 'Oui';
+    if (filterStatus === 'analyzed') return logement.scrape === 'Fait' && logement.predit === 'Non';
+    if (filterStatus === 'pending') return logement.scrape === 'En attente';
+    return true;
+  });
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Gestion des Logements</h1>
+              <p className="text-sm text-gray-600 mt-1">Optimisez vos tarifs et gérez vos propriétés</p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+                <Plus className="w-4 h-4" />
+                <span>Ajouter un logement</span>
+              </button>
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center space-x-2"
+              >
+                <Filter className="w-4 h-4" />
+                <span>Filtres</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Search and Filters */}
+          <div className="mt-4 flex items-center space-x-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Rechercher par nom, ville, pays..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            
+            {showFilters && (
+              <div className="flex items-center space-x-2">
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Tous les statuts</option>
+                  <option value="optimized">Optimisé</option>
+                  <option value="analyzed">Analysé</option>
+                  <option value="pending">En attente</option>
+                </select>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="px-6 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="flex items-center">
+              <Home className="w-8 h-8 text-blue-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">Total logements</p>
+                <p className="text-2xl font-bold text-gray-900">{totalItems}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="flex items-center">
+              <CheckCircle className="w-8 h-8 text-green-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">Optimisés</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {logements.filter(l => l.scrape === 'Fait' && l.predit === 'Oui').length}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="flex items-center">
+              <Clock className="w-8 h-8 text-yellow-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">Analysés</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {logements.filter(l => l.scrape === 'Fait' && l.predit === 'Non').length}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="flex items-center">
+              <AlertCircle className="w-8 h-8 text-gray-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">En attente</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {logements.filter(l => l.scrape === 'En attente').length}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="px-6 pb-6">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-gray-600">Chargement...</span>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <button 
+                        onClick={() => handleSort('nom')}
+                        className="flex items-center space-x-1 hover:text-gray-700"
+                      >
+                        <span>Logement</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </button>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <button 
+                        onClick={() => handleSort('ville')}
+                        className="flex items-center space-x-1 hover:text-gray-700"
+                      >
+                        <span>Localisation</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </button>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Caractéristiques
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <button 
+                        onClick={() => handleSort('minPrice')}
+                        className="flex items-center space-x-1 hover:text-gray-700"
+                      >
+                        <span>Prix min.</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </button>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Statut
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Instructions
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredLogements.map((logement) => (
+                    <tr key={logement.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <Home className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div className="ml-4">
+                            <EditableCell 
+                              logement={logement}
+                              field="nom"
+                              value={logement.nom}
+                              className="font-medium text-gray-900"
+                            />
+                            <p className="text-sm text-gray-500">{logement.typologie}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center text-sm text-gray-900">
+                          <MapPin className="w-4 h-4 text-gray-400 mr-1" />
+                          <div>
+                            <EditableCell 
+                              logement={logement}
+                              field="ville"
+                              value={logement.ville}
+                            />
+                            <p className="text-xs text-gray-500">{logement.country}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-4 text-sm text-gray-900">
+                          <div className="flex items-center">
+                            <Users className="w-4 h-4 text-gray-400 mr-1" />
+                            <span>{logement.capacite}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Home className="w-4 h-4 text-gray-400 mr-1" />
+                            <span>{logement.nbrChambre}ch</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Bed className="w-4 h-4 text-gray-400 mr-1" />
+                            <span>{logement.nbrLit}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center text-sm">
+                          <DollarSign className="w-4 h-4 text-green-600 mr-1" />
+                          <EditableCell 
+                            logement={logement}
+                            field="minPrice"
+                            value={`${logement.minPrice}€`}
+                            className="font-medium text-green-600"
+                          />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          {getStatusIcon(logement.scrape, logement.predit)}
+                          <span className="ml-2 text-sm text-gray-900">
+                            {getStatusText(logement.scrape, logement.predit)}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <EditableCell 
+                          logement={logement}
+                          field="instructions"
+                          value={logement.instructions}
+                          className="text-sm text-gray-600 max-w-xs"
+                        />
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-2">
+                          <button className="text-blue-600 hover:text-blue-700 p-1">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="text-gray-600 hover:text-gray-700 p-1">
+                            <Settings className="w-4 h-4" />
+                          </button>
+                          <button className="text-gray-600 hover:text-gray-700 p-1">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="bg-white px-6 py-3 border-t border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-700">
+                  Affichage de {(currentPage - 1) * limit + 1} à {Math.min(currentPage * limit, totalItems)} sur {totalItems} logements
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  >
+                    Précédent
+                  </button>
+                  <span className="text-sm text-gray-700">
+                    Page {currentPage} sur {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  >
+                    Suivant
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Liste;

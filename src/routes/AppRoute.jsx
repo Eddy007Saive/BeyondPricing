@@ -5,6 +5,7 @@ import {Calendrier} from "@/pages/Campagne";
 
 
 import { SignIn, SignUp } from "@/pages/auth";
+import Liste from "@/pages/Campagne/Liste";
 
 export function AppRoute() {
   return (
@@ -14,6 +15,8 @@ export function AppRoute() {
         <Route path="home" element={<Home />} />
 
         <Route path="calendrier" element={<Calendrier />} />
+        <Route path="logement" element={<Liste />} />
+
 
 
 

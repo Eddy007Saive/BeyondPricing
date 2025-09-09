@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { getUnreadNotificationsCount } from "@/services/Notification"; // Ajustez le chemin
 import { Calendar1Icon } from "lucide-react";
+import { HomeModernIcon } from "@heroicons/react/24/outline";
 
 // Configuration des icônes partagée
 const iconConfig = {
@@ -77,6 +78,13 @@ export const createRoutes = (unreadCount = 0, isLoadingNotifications = false) =>
         icon: <Calendar1Icon {...iconConfig} />,
         name: "Calendrier",
         path: "/calendrier",
+        description: "Gestion des campagnes marketing"
+      },
+
+       {
+        icon: <HomeModernIcon {...iconConfig} />,
+        name: "Logement",
+        path: "/logement",
         description: "Gestion des campagnes marketing"
       }
     ],

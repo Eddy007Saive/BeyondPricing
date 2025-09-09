@@ -52,7 +52,6 @@ export  function Calendrier() {
         const logementNotEmpty=logementsData.filter(logement => logement.tableScoringJournalier!="");
         setLogements(logementNotEmpty);
 
-        console.log(logementsData);
         
 
         // Sélectionner le premier logement par défaut
