@@ -153,6 +153,9 @@ export const getLogements = async (params = {}) => {
       analyser: record.fields["analyser"] || "",
       scrape: record.fields["Scrape"] || "En attente",
       predit: record.fields["predit"] || "Non",
+      instructions:record.fields["instructions"] || "",
+      maxPrice:record.fields["MaxPrice"] || 0,
+
     }));
 
     const totalPages = Math.ceil(totalItems / limit);

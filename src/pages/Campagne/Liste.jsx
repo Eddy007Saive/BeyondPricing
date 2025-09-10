@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit3, Save, X, Filter, ArrowUpDown, MapPin, Home, Users, Bed, DollarSign, Eye, Settings, MoreHorizontal, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Search, Plus, Edit3, Save, X, Filter, ArrowUpDown, MapPin, Home, Users, Bed, DollarSign, Eye, Settings, MoreHorizontal, CheckCircle, Clock, AlertCircle, EuroIcon } from 'lucide-react';
 import { getLogements,updateLogement } from '@/services/Logement';
 
 
@@ -73,15 +73,29 @@ export const Liste = () => {
     setEditingValue(currentValue || '');
   };
 
+  // Fonction pour convertir la valeur selon le type de champ
+  const convertValueByField = (field, value) => {
+    // Champs qui doivent être des nombres
+    if (field === 'MinPrice' || field === 'MaxPrice') {
+      const numValue = parseFloat(value);
+      return isNaN(numValue) ? 0 : numValue;
+    }
+    // Autres champs restent en string
+    return value;
+  };
+
   const handleSaveCell = async (logementId, field) => {
     try {
-      const updateData = { [field]: editingValue };
-      await updateLogement(logementId, updateData); 
+      // Convertir la valeur selon le type attendu
+      const convertedValue = convertValueByField(field, editingValue);
+      const updateData = { [field]: convertedValue };
       
-      // Mettre à jour localement
+      await updateLogement(logementId, updateData); 
+      await fetchLogements();
+      // Mettre à jour localement avec la valeur convertie
       setLogements(prev => prev.map(logement => 
         logement.id === logementId 
-          ? { ...logement, [field]: editingValue }
+          ? { ...logement, [field]: convertedValue }
           : logement
       ));
       
@@ -89,6 +103,7 @@ export const Liste = () => {
       setEditingValue('');
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
+      // Optionnel : afficher un message d'erreur à l'utilisateur
     }
   };
 
@@ -112,7 +127,7 @@ export const Liste = () => {
     return 'En attente';
   };
 
-  const EditableCell = ({ logement, field, value, className = "" }) => {
+  const EditableCell = ({ logement, field, value, className = "", isNumeric = false }) => {
     const cellId = `${logement.id}-${field}`;
     const isEditing = editingCell === cellId;
 
@@ -120,7 +135,7 @@ export const Liste = () => {
       return (
         <div className="flex items-center space-x-2">
           <input
-            type="text"
+            type={isNumeric ? "number" : "text"}
             value={editingValue}
             onChange={(e) => setEditingValue(e.target.value)}
             className="px-2 py-1 border border-blue-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -129,6 +144,8 @@ export const Liste = () => {
               if (e.key === 'Escape') handleCancelEdit();
             }}
             autoFocus
+            min={isNumeric ? "0" : undefined}
+            step={isNumeric ? "0.01" : undefined}
           />
           <button
             onClick={() => handleSaveCell(logement.id, field)}
@@ -314,6 +331,16 @@ export const Liste = () => {
                         <ArrowUpDown className="w-3 h-3" />
                       </button>
                     </th>
+
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <button 
+                        onClick={() => handleSort('maxPrice')}
+                        className="flex items-center space-x-1 hover:text-gray-700"
+                      >
+                        <span>Prix max.</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </button>
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Statut
                     </th>
@@ -375,12 +402,25 @@ export const Liste = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center text-sm">
-                          <DollarSign className="w-4 h-4 text-green-600 mr-1" />
+                          <EuroIcon className="w-4 h-4 text-green-600 mr-1" />
                           <EditableCell 
                             logement={logement}
-                            field="minPrice"
-                            value={`${logement.minPrice}€`}
+                            field="MinPrice"
+                            value={`${logement.minPrice}`}
                             className="font-medium text-green-600"
+                            isNumeric={true}
+                          />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center text-sm">
+                          <EuroIcon className="w-4 h-4 text-green-600 mr-1" />
+                          <EditableCell 
+                            logement={logement}
+                            field="MaxPrice"
+                            value={`${logement.maxPrice}`}
+                            className="font-medium text-green-600"
+                            isNumeric={true}
                           />
                         </div>
                       </td>

@@ -12,15 +12,7 @@ export const NotificationProvider = ({ children }) => {
 
   // Fonction pour récupérer le compteur
 const fetchUnreadCount = useCallback(async () => {
-  try {
-    const response = await getUnreadNotificationsCount();
-    const newCount = response?.data?.count ?? 0;
-    setUnreadCount(prev => {
-      return prev !== newCount ? newCount : prev;
-    });
-  } catch (error) {
-    console.error('[fetchUnreadCount] error:', error);
-  }
+
 }, []);
 
   // Fonction pour forcer la mise à jour
@@ -43,33 +35,13 @@ const fetchUnreadCount = useCallback(async () => {
 
   // Gestion de la visibilité de la page (pause quand l'onglet n'est pas actif)
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      isDocumentVisible.current = !document.hidden;
-      
-      if (isDocumentVisible.current) {
-        // Rafraîchir immédiatement quand on revient sur l'onglet
-        fetchUnreadCount();
-        // Reprendre le polling
-        startPolling();
-      } else {
-        // Arrêter le polling quand l'onglet n'est pas actif
-        stopPolling();
-      }
-    };
+   
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [fetchUnreadCount]);
 
   // Fonction pour démarrer le polling
   const startPolling = useCallback(() => {
-    stopPolling(); // Arrêter l'ancien interval s'il existe
-    
-    intervalRef.current = setInterval(() => {
-      if (isDocumentVisible.current) {
-        fetchUnreadCount();
-      }
-    }, 15000); // Toutes les 15 secondes (plus fréquent)
+
   }, [fetchUnreadCount]);
 
   // Fonction pour arrêter le polling
