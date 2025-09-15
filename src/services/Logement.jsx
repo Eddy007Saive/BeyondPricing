@@ -155,6 +155,7 @@ export const getLogements = async (params = {}) => {
       predit: record.fields["predit"] || "Non",
       instructions:record.fields["instructions"] || "",
       maxPrice:record.fields["MaxPrice"] || 0,
+      offset:record.fields["Offset"] * 100  || 0,
 
     }));
 

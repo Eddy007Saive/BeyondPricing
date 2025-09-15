@@ -3,13 +3,6 @@ import { Search, Plus, Edit3, Save, X, Filter, ArrowUpDown, MapPin, Home, Users,
 import { getLogements,updateLogement } from '@/services/Logement';
 
 
-const mockUpdateLogement = async (id, data) => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve({ success: true });
-    }, 300);
-  });
-};
 
 export const Liste = () => {
   const [logements, setLogements] = useState([]);
@@ -84,28 +77,43 @@ export const Liste = () => {
     return value;
   };
 
-  const handleSaveCell = async (logementId, field) => {
-    try {
-      // Convertir la valeur selon le type attendu
-      const convertedValue = convertValueByField(field, editingValue);
-      const updateData = { [field]: convertedValue };
-      
-      await updateLogement(logementId, updateData); 
-      await fetchLogements();
-      // Mettre à jour localement avec la valeur convertie
-      setLogements(prev => prev.map(logement => 
-        logement.id === logementId 
-          ? { ...logement, [field]: convertedValue }
-          : logement
-      ));
-      
-      setEditingCell(null);
-      setEditingValue('');
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
-      // Optionnel : afficher un message d'erreur à l'utilisateur
+const handleSaveCell = async (logementId, field) => {
+  try {
+    let newValue;
+
+    if (field === "Offset") {
+      // Transformer en decimal pour Airtable
+      const numericValue = parseFloat(editingValue);
+      newValue = !isNaN(numericValue) ? numericValue / 100 : 0;
+    } else {
+      // Pour les autres champs, utiliser la conversion standard
+      newValue = convertValueByField(field, editingValue);
     }
-  };
+
+    const updateData = { [field]: newValue };
+
+    // Mettre à jour Airtable
+    await updateLogement(logementId, updateData);
+    await fetchLogements();
+
+    // Mettre à jour localement
+    setLogements(prev =>
+      prev.map(logement =>
+        logement.id === logementId
+          ? { ...logement, [field]: newValue }
+          : logement
+      )
+    );
+
+    // Reset édition
+    setEditingCell(null);
+    setEditingValue('');
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde:', error);
+    // Optionnel : afficher un message à l'utilisateur
+  }
+};
+
 
   const handleCancelEdit = () => {
     setEditingCell(null);
@@ -130,6 +138,8 @@ export const Liste = () => {
   const EditableCell = ({ logement, field, value, className = "", isNumeric = false }) => {
     const cellId = `${logement.id}-${field}`;
     const isEditing = editingCell === cellId;
+
+
 
     if (isEditing) {
       return (
@@ -341,6 +351,16 @@ export const Liste = () => {
                         <ArrowUpDown className="w-3 h-3" />
                       </button>
                     </th>
+
+                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <button 
+                        onClick={() => handleSort('Offset')}
+                        className="flex items-center space-x-1 hover:text-gray-700"
+                      >
+                        <span>Offset</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </button>
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Statut
                     </th>
@@ -419,6 +439,18 @@ export const Liste = () => {
                             logement={logement}
                             field="MaxPrice"
                             value={`${logement.maxPrice}`}
+                            className="font-medium text-green-600"
+                            isNumeric={true}
+                          />
+                        </div>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <div className="flex items-center text-sm">
+                          <EditableCell 
+                            logement={logement}
+                            field="Offset"
+                            value={`${logement.offset}`}
                             className="font-medium text-green-600"
                             isNumeric={true}
                           />
