@@ -1,11 +1,12 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Dashboard, Auth } from "@/layouts";
 import { Home } from "@/pages/dashboard/home";
-import {Calendrier} from "@/pages/Campagne";
+import {Calendrier} from "@/pages/Logements";
 
 
 import { SignIn, SignUp } from "@/pages/auth";
-import Liste from "@/pages/Campagne/Liste";
+import Liste from "@/pages/Logements/Liste";
+import { ListeEvenements } from "@/pages/Evenement";
 
 export function AppRoute() {
   return (
@@ -16,6 +17,8 @@ export function AppRoute() {
 
         <Route path="calendrier" element={<Calendrier />} />
         <Route path="logement" element={<Liste />} />
+        <Route path="evenement" element={<ListeEvenements />} />
+
 
 
 

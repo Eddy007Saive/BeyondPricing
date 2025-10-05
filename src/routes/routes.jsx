@@ -63,6 +63,12 @@ export const createRoutes = (unreadCount = 0, isLoadingNotifications = false) =>
         name: "Logement",
         path: "/logement",
         description: "Gestion des campagnes marketing"
+      },
+        {
+        icon: <Calendar1Icon {...iconConfig} />,
+        name: "Evenement",
+        path: "/evenement",
+        description: "Gestion des campagnes marketing"
       }
     ],
   }
