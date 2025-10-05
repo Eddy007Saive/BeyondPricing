@@ -53,7 +53,7 @@ export function DashboardNavbar() {
             <Link to={`/${layout}`}>
               <Typography
                 variant="small"
-                color="blue-gray"
+                color="white"
                 className="font-normal opacity-50 transition-all hover:text-blue-500 hover:opacity-100"
               >
                 {layout}
@@ -61,34 +61,17 @@ export function DashboardNavbar() {
             </Link>
             <Typography
               variant="small"
-              color="blue-gray"
+              color="white"
               className="font-normal"
             >
               {page}
             </Typography>
           </Breadcrumbs>
-          <Typography variant="h6" color="blue-gray">
+          <Typography variant="h6" color="white">
             {page}
           </Typography>
         </div>
-        <div className="flex items-center">
-          <IconButton
-            variant="text"
-            color="blue-gray"
-            className="grid xl:hidden"
-            onClick={() => setOpenSidenav(dispatch, !openSidenav)}
-          >
-            <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
-          </IconButton>
-      
-          <IconButton
-            variant="text"
-            color="blue-gray"
-            onClick={() => setOpenConfigurator(dispatch, true)}
-          >
-            <Cog6ToothIcon className="h-5 w-5 text-blue-gray-500" />
-          </IconButton>
-        </div>
+     
       </div>
     </Navbar>
   );

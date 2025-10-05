@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit3, Save, X, Filter, ArrowUpDown, MapPin, Home, Users, Bed, DollarSign, Eye, Settings, MoreHorizontal, CheckCircle, Clock, AlertCircle, EuroIcon } from 'lucide-react';
+import { Search, Plus, Edit3, Save, X, Filter, ArrowUpDown, MapPin, Home, Users, Bed, Eye, Settings, MoreHorizontal, CheckCircle, Clock, AlertCircle, Euro, Trash2, Edit, Power } from 'lucide-react';
 import { getLogements,updateLogement } from '@/services/Logement';
-
-
 
 export const Liste = () => {
   const [logements, setLogements] = useState([]);
@@ -14,43 +12,48 @@ export const Liste = () => {
   const [editingCell, setEditingCell] = useState(null);
   const [editingValue, setEditingValue] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-
-  // États pour la pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [limit] = useState(10);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedLogement, setSelectedLogement] = useState(null);
 
   useEffect(() => {
     fetchLogements();
   }, [currentPage, searchTerm, filterStatus, sortBy, sortOrder]);
 
-  const fetchLogements = async () => {
-    try {
-      setLoading(true);
-      const params = {
-        page: currentPage,
-        limit,
-        search: searchTerm,
-        sortBy,
-        sortOrder
-      };
-      
-      const response = await getLogements(params); // Remplacez par getLogements(params)
-      setLogements(response.data.logements);
-      setTotalPages(response.data.totalPages);
-      setTotalItems(response.data.totalItems);
-    } catch (error) {
-      console.error('Erreur lors du chargement:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
   };
+
+  
+    const fetchLogements = async () => {
+      try {
+        setLoading(true);
+        const params = {
+          page: currentPage,
+          limit,
+          search: searchTerm,
+          sortBy,
+          sortOrder
+        };
+        
+        const response = await getLogements(params); // Remplacez par getLogements(params)
+        console.log(response.data.logements
+        );
+        
+        setLogements(response.data.logements);
+        setTotalPages(response.data.totalPages);
+        setTotalItems(response.data.totalItems);
+      } catch (error) {
+        console.error('Erreur lors du chargement:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const handleSort = (column) => {
     if (sortBy === column) {
@@ -66,67 +69,59 @@ export const Liste = () => {
     setEditingValue(currentValue || '');
   };
 
-  // Fonction pour convertir la valeur selon le type de champ
-  const convertValueByField = (field, value) => {
-    // Champs qui doivent être des nombres
-    if (field === 'MinPrice' || field === 'MaxPrice') {
-      const numValue = parseFloat(value);
-      return isNaN(numValue) ? 0 : numValue;
-    }
-    // Autres champs restent en string
-    return value;
-  };
-
-const handleSaveCell = async (logementId, field) => {
-  try {
-    let newValue;
-
-    if (field === "Offset") {
-      // Transformer en decimal pour Airtable
-      const numericValue = parseFloat(editingValue);
-      newValue = !isNaN(numericValue) ? numericValue / 100 : 0;
-    } else {
-      // Pour les autres champs, utiliser la conversion standard
-      newValue = convertValueByField(field, editingValue);
-    }
-
-    const updateData = { [field]: newValue };
-
-    // Mettre à jour Airtable
-    await updateLogement(logementId, updateData);
-    await fetchLogements();
-
-    // Mettre à jour localement
-    setLogements(prev =>
-      prev.map(logement =>
-        logement.id === logementId
-          ? { ...logement, [field]: newValue }
-          : logement
-      )
-    );
-
-    // Reset édition
+  const handleSaveCell = async (logementId, field) => {
     setEditingCell(null);
     setEditingValue('');
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde:', error);
-    // Optionnel : afficher un message à l'utilisateur
-  }
-};
-
+  };
 
   const handleCancelEdit = () => {
     setEditingCell(null);
     setEditingValue('');
   };
 
+  const handleToggleActif = async (logementId, currentStatus) => {
+    setLogements(prev =>
+      prev.map(log =>
+        log.id === logementId ? { ...log, actif: !currentStatus } : log
+      )
+    );
+  };
+
+  const handleDeleteClick = (logement) => {
+    setSelectedLogement(logement);
+    setShowDeleteModal(true);
+  };
+
+  const handleEditClick = (logement) => {
+    setSelectedLogement(logement);
+    setShowEditModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    // Supprimer le logement
+    setLogements(prev => prev.filter(log => log.id !== selectedLogement.id));
+    setShowDeleteModal(false);
+    setSelectedLogement(null);
+  };
+
+  const handleEditSave = async () => {
+    // Sauvegarder les modifications
+    setLogements(prev =>
+      prev.map(log =>
+        log.id === selectedLogement.id ? selectedLogement : log
+      )
+    );
+    setShowEditModal(false);
+    setSelectedLogement(null);
+  };
+
   const getStatusIcon = (scrape, predit) => {
     if (scrape === 'Fait' && predit === 'Oui') {
-      return <CheckCircle className="w-4 h-4 text-green-500" />;
+      return <CheckCircle className="w-4 h-4 text-primary-500" />;
     } else if (scrape === 'Fait') {
-      return <Clock className="w-4 h-4 text-yellow-500" />;
+      return <Clock className="w-4 h-4 text-yellow-400" />;
     }
-    return <AlertCircle className="w-4 h-4 text-gray-400" />;
+    return <AlertCircle className="w-4 h-4 text-gray-500" />;
   };
 
   const getStatusText = (scrape, predit) => {
@@ -139,8 +134,6 @@ const handleSaveCell = async (logementId, field) => {
     const cellId = `${logement.id}-${field}`;
     const isEditing = editingCell === cellId;
 
-
-
     if (isEditing) {
       return (
         <div className="flex items-center space-x-2">
@@ -148,25 +141,17 @@ const handleSaveCell = async (logementId, field) => {
             type={isNumeric ? "number" : "text"}
             value={editingValue}
             onChange={(e) => setEditingValue(e.target.value)}
-            className="px-2 py-1 border border-blue-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-2 py-1 bg-bleu-fonce/50 border border-primary-500 rounded text-sm text-blanc-pur focus:outline-none focus:ring-2 focus:ring-primary-500"
             onKeyPress={(e) => {
               if (e.key === 'Enter') handleSaveCell(logement.id, field);
               if (e.key === 'Escape') handleCancelEdit();
             }}
             autoFocus
-            min={isNumeric ? "0" : undefined}
-            step={isNumeric ? "0.01" : undefined}
           />
-          <button
-            onClick={() => handleSaveCell(logement.id, field)}
-            className="p-1 text-green-600 hover:text-green-700"
-          >
+          <button onClick={() => handleSaveCell(logement.id, field)} className="p-1 text-primary-500 hover:text-primary-400">
             <Save className="w-3 h-3" />
           </button>
-          <button
-            onClick={handleCancelEdit}
-            className="p-1 text-red-600 hover:text-red-700"
-          >
+          <button onClick={handleCancelEdit} className="p-1 text-secondary-500 hover:text-secondary-400">
             <X className="w-3 h-3" />
           </button>
         </div>
@@ -175,12 +160,12 @@ const handleSaveCell = async (logementId, field) => {
 
     return (
       <div 
-        className={`group cursor-pointer hover:bg-gray-50 px-2 py-1 rounded ${className}`}
+        className={`group cursor-pointer hover:bg-primary-500/10 px-2 py-1 rounded transition-all duration-300 ${className}`}
         onClick={() => handleEditCell(logement.id, field, value)}
       >
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-900">{value || 'Cliquer pour ajouter'}</span>
-          <Edit3 className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <span className="text-sm text-blanc-pur">{value || 'Ajouter'}</span>
+          <Edit3 className="w-3 h-3 text-primary-500/50 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
       </div>
     );
@@ -195,293 +180,292 @@ const handleSaveCell = async (logementId, field) => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Gestion des Logements</h1>
-              <p className="text-sm text-gray-600 mt-1">Optimisez vos tarifs et gérez vos propriétés</p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
-                <Plus className="w-4 h-4" />
-                <span>Ajouter un logement</span>
-              </button>
-              <button 
-                onClick={() => setShowFilters(!showFilters)}
-                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center space-x-2"
-              >
-                <Filter className="w-4 h-4" />
-                <span>Filtres</span>
-              </button>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-bleu-fonce via-noir-absolu to-bleu-fonce relative overflow-hidden">
+      {/* Effets de particules */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary-500 rounded-full animate-pulse"></div>
+        <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-secondary-500 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/6 w-1.5 h-1.5 bg-primary-400 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
 
-          {/* Search and Filters */}
-          <div className="mt-4 flex items-center space-x-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Rechercher par nom, ville, pays..."
-                value={searchTerm}
-                onChange={handleSearch}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+      {/* Grille de circuits */}
+      <div className="absolute inset-0 opacity-5">
+        <svg className="w-full h-full">
+          <defs>
+            <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+              <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#00CFFF" strokeWidth="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+      </div>
+
+      <div className="relative z-10 p-6">
+        {/* Header Card */}
+        <div className="bg-gradient-to-r from-bleu-fonce/90 via-noir-absolu/90 to-bleu-fonce/90 rounded-xl border border-primary-500/30 shadow-neon-gradient backdrop-blur-xl mb-6 relative overflow-hidden">
+          {/* Glow animé */}
+          <div className="absolute inset-0 border border-primary-500/50 rounded-xl animate-pulse pointer-events-none"></div>
+          <div className="absolute -inset-0.5 bg-gradient-primary opacity-10 blur-xl animate-pulse"></div>
+
+          {/* Header Content */}
+          <div className="relative p-8 border-b border-primary-500/20">
+            <div className="absolute inset-0 opacity-10">
+              <svg className="w-full h-full">
+                <defs>
+                  <pattern id="hexagons" x="0" y="0" width="50" height="43.4" patternUnits="userSpaceOnUse">
+                    <polygon points="25,0 50,14.43 50,28.87 25,43.3 0,28.87 0,14.43" fill="none" stroke="#00CFFF" strokeWidth="0.5" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#hexagons)" />
+              </svg>
             </div>
-            
+
+            <div className="flex justify-between items-center relative z-10">
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-primary-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-secondary-500 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                </div>
+                
+                <h1 className="text-3xl font-bold text-blanc-pur tracking-[0.2em] uppercase relative">
+                  <span className="relative z-10">LOGEMENTS</span>
+                  <div className="absolute inset-0 bg-gradient-primary bg-clip-text text-transparent animate-pulse opacity-50"></div>
+                </h1>
+
+                <div className="hidden md:flex items-center space-x-2 bg-noir-absolu/50 px-4 py-2 rounded-full border border-primary-500/30">
+                  <span className="text-xs text-primary-500 uppercase tracking-wider">Total:</span>
+                  <span className="text-sm font-bold text-blanc-pur font-mono">{totalItems}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <button 
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="relative bg-gradient-to-r from-bleu-fonce/80 to-noir-absolu/80 text-primary-500 px-6 py-3 rounded-lg border border-primary-500/30 hover:border-primary-500 transition-all duration-300 overflow-hidden group"
+                >
+                  <span className="relative z-10 flex items-center space-x-2">
+                    <Filter className="w-4 h-4" />
+                    <span>Filtres</span>
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                </button>
+
+                <button className="relative bg-gradient-primary text-noir-absolu px-6 py-3 rounded-lg font-bold uppercase tracking-wider transition-all duration-300 hover:scale-105 shadow-neon-gradient overflow-hidden group">
+                  <span className="relative z-10 flex items-center space-x-2">
+                    <Plus className="w-4 h-4" />
+                    <span>Nouveau</span>
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blanc-pur/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                </button>
+              </div>
+            </div>
+
+            {/* Search Bar */}
+            <div className="mt-6 relative group">
+              <div className="absolute -inset-0.5 bg-gradient-primary rounded-lg blur opacity-0 group-hover:opacity-30 transition-opacity"></div>
+              <div className="relative bg-bleu-fonce/50 border border-primary-500/30 rounded-lg overflow-hidden">
+                <div className="flex items-center px-4">
+                  <Search className="w-5 h-5 text-primary-500" />
+                  <input
+                    type="text"
+                    placeholder="Rechercher par nom, ville, pays..."
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    className="w-full px-4 py-3 bg-transparent text-blanc-pur placeholder-blanc-pur/50 focus:outline-none"
+                  />
+                </div>
+                <div className="absolute bottom-0 left-0 h-0.5 bg-gradient-primary w-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+              </div>
+            </div>
+
+            {/* Filters */}
             {showFilters && (
-              <div className="flex items-center space-x-2">
+              <div className="mt-4 flex items-center space-x-4">
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:outline-none focus:border-primary-500"
                 >
-                  <option value="all">Tous les statuts</option>
-                  <option value="optimized">Optimisé</option>
-                  <option value="analyzed">Analysé</option>
+                  <option value="all">Tous</option>
+                  <option value="optimized">Optimisés</option>
+                  <option value="analyzed">Analysés</option>
                   <option value="pending">En attente</option>
                 </select>
               </div>
             )}
           </div>
-        </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="px-6 py-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center">
-              <Home className="w-8 h-8 text-blue-600" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Total logements</p>
-                <p className="text-2xl font-bold text-gray-900">{totalItems}</p>
+          {/* Stats */}
+          <div className="grid grid-cols-4 gap-4 p-6">
+            {[
+              { icon: Home, label: "Total", value: totalItems, color: "primary" },
+              { icon: CheckCircle, label: "Optimisés", value: logements.filter(l => l.scrape === 'Fait' && l.predit === 'Oui').length, color: "primary" },
+              { icon: Clock, label: "Analysés", value: logements.filter(l => l.scrape === 'Fait' && l.predit === 'Non').length, color: "yellow" },
+              { icon: AlertCircle, label: "En attente", value: logements.filter(l => l.scrape === 'En attente').length, color: "gray" }
+            ].map((stat, idx) => (
+              <div key={idx} className="relative bg-gradient-to-br from-bleu-fonce/60 to-noir-absolu/60 p-4 rounded-lg border border-primary-500/20 backdrop-blur-sm overflow-hidden group hover:border-primary-500/50 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 transition-opacity"></div>
+                <div className="relative z-10 flex items-center space-x-3">
+                  <stat.icon className={`w-8 h-8 text-${stat.color}-500`} />
+                  <div>
+                    <p className="text-xs text-blanc-pur/60 uppercase tracking-wider">{stat.label}</p>
+                    <p className="text-2xl font-bold text-blanc-pur font-mono">{stat.value}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center">
-              <CheckCircle className="w-8 h-8 text-green-600" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Optimisés</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {logements.filter(l => l.scrape === 'Fait' && l.predit === 'Oui').length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center">
-              <Clock className="w-8 h-8 text-yellow-600" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Analysés</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {logements.filter(l => l.scrape === 'Fait' && l.predit === 'Non').length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center">
-              <AlertCircle className="w-8 h-8 text-gray-600" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">En attente</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {logements.filter(l => l.scrape === 'En attente').length}
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
-      </div>
 
-      {/* Table */}
-      <div className="px-6 pb-6">
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        {/* Table */}
+        <div className="bg-gradient-to-b from-bleu-fonce/90 to-noir-absolu/90 rounded-xl border border-primary-500/30 shadow-neon-gradient backdrop-blur-xl overflow-hidden">
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600">Chargement...</span>
+            <div className="flex items-center justify-center py-20">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-primary-500/30 border-t-primary-500 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 w-16 h-16 border-4 border-secondary-500/30 border-t-secondary-500 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+              </div>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gradient-to-r from-bleu-fonce via-noir-absolu to-bleu-fonce">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <button 
-                        onClick={() => handleSort('nom')}
-                        className="flex items-center space-x-1 hover:text-gray-700"
+                    {[
+                      { key: 'nom', label: 'Logement' },
+                      { key: 'ville', label: 'Localisation' },
+                      { key: 'caracteristiques', label: 'Caractéristiques' },
+                      { key: 'basePrice', label: 'Prix de Base' },
+                      { key: 'minPrice', label: 'Prix Min.' },
+                      { key: 'maxPrice', label: 'Prix Max.' },
+                      { key: 'offset', label: 'Offset' },
+                      { key: 'actif', label: 'Actif' },
+                    ].map((col, idx) => (
+                      <th
+                        key={col.key}
+                        className="px-6 py-4 text-left cursor-pointer hover:bg-primary-500/5 transition-all duration-300 relative group"
+                        onClick={() => col.key !== 'actions' && col.key !== 'caracteristiques' && handleSort(col.key)}
                       >
-                        <span>Logement</span>
-                        <ArrowUpDown className="w-3 h-3" />
-                      </button>
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <button 
-                        onClick={() => handleSort('ville')}
-                        className="flex items-center space-x-1 hover:text-gray-700"
-                      >
-                        <span>Localisation</span>
-                        <ArrowUpDown className="w-3 h-3" />
-                      </button>
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Caractéristiques
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <button 
-                        onClick={() => handleSort('minPrice')}
-                        className="flex items-center space-x-1 hover:text-gray-700"
-                      >
-                        <span>Prix min.</span>
-                        <ArrowUpDown className="w-3 h-3" />
-                      </button>
-                    </th>
-
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <button 
-                        onClick={() => handleSort('maxPrice')}
-                        className="flex items-center space-x-1 hover:text-gray-700"
-                      >
-                        <span>Prix max.</span>
-                        <ArrowUpDown className="w-3 h-3" />
-                      </button>
-                    </th>
-
-                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <button 
-                        onClick={() => handleSort('Offset')}
-                        className="flex items-center space-x-1 hover:text-gray-700"
-                      >
-                        <span>Offset</span>
-                        <ArrowUpDown className="w-3 h-3" />
-                      </button>
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Statut
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Instructions
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs font-bold uppercase text-blanc-pur/90 tracking-wider group-hover:text-primary-500 transition-colors">
+                            {col.label}
+                          </span>
+                          {sortBy === col.key && (
+                            <span className="text-primary-500">{sortOrder === 'ASC' ? '↑' : '↓'}</span>
+                          )}
+                        </div>
+                        {idx < 8 && <div className="absolute right-0 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-primary-500/30 to-transparent"></div>}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredLogements.map((logement) => (
-                    <tr key={logement.id} className="hover:bg-gray-50">
+                <tbody>
+                  {filteredLogements.map((logement, idx) => (
+                    <tr key={logement.id} className="border-b border-primary-500/10 hover:bg-gradient-to-r hover:from-primary-500/5 hover:to-secondary-500/5 transition-all duration-300 group">
                       <td className="px-6 py-4">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <Home className="w-5 h-5 text-blue-600" />
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center">
+                            <Home className="w-6 h-6 text-noir-absolu" />
                           </div>
-                          <div className="ml-4">
-                            <EditableCell 
-                              logement={logement}
-                              field="nom"
-                              value={logement.nom}
-                              className="font-medium text-gray-900"
-                            />
-                            <p className="text-sm text-gray-500">{logement.typologie}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center text-sm text-gray-900">
-                          <MapPin className="w-4 h-4 text-gray-400 mr-1" />
                           <div>
-                            <EditableCell 
-                              logement={logement}
-                              field="ville"
-                              value={logement.ville}
-                            />
-                            <p className="text-xs text-gray-500">{logement.country}</p>
+                            <EditableCell logement={logement} field="nom" value={logement.nom} className="font-bold" />
+                            <p className="text-xs text-blanc-pur/60">{logement.typologie}</p>
                           </div>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center space-x-4 text-sm text-gray-900">
-                          <div className="flex items-center">
-                            <Users className="w-4 h-4 text-gray-400 mr-1" />
-                            <span>{logement.capacite}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Home className="w-4 h-4 text-gray-400 mr-1" />
-                            <span>{logement.nbrChambre}ch</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Bed className="w-4 h-4 text-gray-400 mr-1" />
-                            <span>{logement.nbrLit}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center text-sm">
-                          <EuroIcon className="w-4 h-4 text-green-600 mr-1" />
-                          <EditableCell 
-                            logement={logement}
-                            field="MinPrice"
-                            value={`${logement.minPrice}`}
-                            className="font-medium text-green-600"
-                            isNumeric={true}
-                          />
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center text-sm">
-                          <EuroIcon className="w-4 h-4 text-green-600 mr-1" />
-                          <EditableCell 
-                            logement={logement}
-                            field="MaxPrice"
-                            value={`${logement.maxPrice}`}
-                            className="font-medium text-green-600"
-                            isNumeric={true}
-                          />
-                        </div>
-                      </td>
-
-                      <td className="px-6 py-4">
-                        <div className="flex items-center text-sm">
-                          <EditableCell 
-                            logement={logement}
-                            field="Offset"
-                            value={`${logement.offset}`}
-                            className="font-medium text-green-600"
-                            isNumeric={true}
-                          />
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center">
-                          {getStatusIcon(logement.scrape, logement.predit)}
-                          <span className="ml-2 text-sm text-gray-900">
-                            {getStatusText(logement.scrape, logement.predit)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <EditableCell 
-                          logement={logement}
-                          field="instructions"
-                          value={logement.instructions}
-                          className="text-sm text-gray-600 max-w-xs"
-                        />
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
-                          <button className="text-blue-600 hover:text-blue-700 p-1">
-                            <Eye className="w-4 h-4" />
+                          <MapPin className="w-4 h-4 text-primary-500" />
+                          <div>
+                            <EditableCell logement={logement} field="ville" value={logement.ville} />
+                            <p className="text-xs text-blanc-pur/60">{logement.country}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-4 text-sm">
+                          <div className="flex items-center space-x-1">
+                            <Users className="w-4 h-4 text-primary-400" />
+                            <span className="text-blanc-pur">{logement.capacite}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Home className="w-4 h-4 text-secondary-400" />
+                            <span className="text-blanc-pur">{logement.nbrChambre}ch</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Bed className="w-4 h-4 text-primary-300" />
+                            <span className="text-blanc-pur">{logement.nbrLit}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-1">
+                          <Euro className="w-4 h-4 text-blanc-pur/80" />
+                          <EditableCell logement={logement} field="basePrice" value={logement.basePrice} className="text-blanc-pur font-bold" isNumeric={true} />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-1">
+                          <Euro className="w-4 h-4 text-primary-500" />
+                          <EditableCell logement={logement} field="MinPrice" value={logement.minPrice} className="text-primary-500 font-bold" isNumeric={true} />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-1">
+                          <Euro className="w-4 h-4 text-secondary-500" />
+                          <EditableCell logement={logement} field="MaxPrice" value={logement.maxPrice} className="text-secondary-500 font-bold" isNumeric={true} />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <EditableCell logement={logement} field="Offset" value={`${logement.offset}%`} className="text-blanc-pur" isNumeric={true} />
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => handleToggleActif(logement.id, logement.etat)}
+                          className={`relative group flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                            logement.etat
+                              ? 'bg-primary-500/20 border border-primary-500/50'
+                              : 'bg-gray-500/20 border border-gray-500/50'
+                          }`}
+                        >
+                          <Power
+                            className={`w-4 h-4 transition-colors ${
+                              logement.etat ? 'text-primary-500' : 'text-gray-500'
+                            }`}
+                          />
+                          <span
+                            className={`text-sm font-bold ${
+                              logement.etat ? 'text-primary-500' : 'text-gray-500'
+                            }`}
+                          >
+                            {logement.etat ? 'ON' : 'OFF'}
+                          </span>
+                          {logement.etat && (
+                            <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary-500 rounded-full animate-pulse"></div>
+                          )}
+                        </button>
+                      </td>
+                      <td className="px-6 py-4">
+                        <EditableCell logement={logement} field="instructions" value={logement.instructions} className="text-blanc-pur/70 text-sm" />
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-2">
+                          <button 
+                            onClick={() => handleEditClick(logement)}
+                            className="p-2 hover:bg-primary-500/20 rounded-lg transition-colors group"
+                            title="Modifier"
+                          >
+                            <Edit className="w-4 h-4 text-primary-500 group-hover:scale-110 transition-transform" />
                           </button>
-                          <button className="text-gray-600 hover:text-gray-700 p-1">
-                            <Settings className="w-4 h-4" />
+                          <button 
+                            onClick={() => handleDeleteClick(logement)}
+                            className="p-2 hover:bg-secondary-500/20 rounded-lg transition-colors group"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="w-4 h-4 text-secondary-500 group-hover:scale-110 transition-transform" />
                           </button>
-                          <button className="text-gray-600 hover:text-gray-700 p-1">
-                            <MoreHorizontal className="w-4 h-4" />
+                          <button className="p-2 hover:bg-blanc-pur/20 rounded-lg transition-colors group" title="Plus d'options">
+                            <MoreHorizontal className="w-4 h-4 text-blanc-pur group-hover:rotate-90 transition-transform" />
                           </button>
                         </div>
                       </td>
@@ -494,26 +478,24 @@ const handleSaveCell = async (logementId, field) => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="bg-white px-6 py-3 border-t border-gray-200">
+            <div className="p-6 border-t border-primary-500/20">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700">
-                  Affichage de {(currentPage - 1) * limit + 1} à {Math.min(currentPage * limit, totalItems)} sur {totalItems} logements
+                <div className="text-sm text-blanc-pur/70">
+                  Affichage de {(currentPage - 1) * limit + 1} à {Math.min(currentPage * limit, totalItems)} sur {totalItems}
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-4">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    className="px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur disabled:opacity-30 hover:border-primary-500 transition-all"
                   >
                     Précédent
                   </button>
-                  <span className="text-sm text-gray-700">
-                    Page {currentPage} sur {totalPages}
-                  </span>
+                  <span className="text-blanc-pur">Page {currentPage} / {totalPages}</span>
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    className="px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur disabled:opacity-30 hover:border-primary-500 transition-all"
                   >
                     Suivant
                   </button>
@@ -522,6 +504,225 @@ const handleSaveCell = async (logementId, field) => {
             </div>
           )}
         </div>
+
+        {/* Modal de suppression */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-noir-absolu/80 backdrop-blur-sm">
+            <div className="relative bg-gradient-to-br from-bleu-fonce via-noir-absolu to-bleu-fonce border border-secondary-500/50 rounded-xl p-8 max-w-md w-full shadow-neon-gradient">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-secondary-500 to-primary-500 opacity-20 blur-xl animate-pulse"></div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center space-x-4 mb-6">
+                  <div className="w-12 h-12 bg-secondary-500/20 rounded-full flex items-center justify-center">
+                    <AlertCircle className="w-6 h-6 text-secondary-500" />
+                  </div>
+                  <h3 className="text-xl font-bold text-blanc-pur uppercase tracking-wider">Confirmer la suppression</h3>
+                </div>
+
+                <div className="mb-6 p-4 bg-noir-absolu/50 rounded-lg border border-secondary-500/30">
+                  <p className="text-blanc-pur/80 mb-2">
+                    Êtes-vous sûr de vouloir supprimer ce logement ?
+                  </p>
+                  <p className="text-primary-500 font-bold">{selectedLogement?.nom}</p>
+                  <p className="text-blanc-pur/60 text-sm mt-1">{selectedLogement?.ville}, {selectedLogement?.country}</p>
+                </div>
+
+                <p className="text-secondary-500 text-sm mb-6">
+                  Cette action est irréversible et supprimera toutes les données associées.
+                </p>
+
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
+                    className="flex-1 px-6 py-3 bg-bleu-fonce/50 border border-blanc-pur/30 rounded-lg text-blanc-pur hover:border-blanc-pur transition-all duration-300"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={handleDeleteConfirm}
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-secondary-500 to-secondary-600 rounded-lg text-blanc-pur font-bold hover:scale-105 transition-all duration-300 shadow-neon-violet"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal d'édition */}
+        {showEditModal && selectedLogement && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-noir-absolu/80 backdrop-blur-sm overflow-y-auto">
+            <div className="relative bg-gradient-to-br from-bleu-fonce via-noir-absolu to-bleu-fonce border border-primary-500/50 rounded-xl p-8 max-w-2xl w-full shadow-neon-gradient my-8">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-secondary-500 opacity-20 blur-xl animate-pulse"></div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-primary-500/20 rounded-full flex items-center justify-center">
+                      <Edit className="w-6 h-6 text-primary-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-blanc-pur uppercase tracking-wider">Modifier le logement</h3>
+                  </div>
+                  <button
+                    onClick={() => setShowEditModal(false)}
+                    className="p-2 hover:bg-secondary-500/20 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-blanc-pur" />
+                  </button>
+                </div>
+
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-primary-500 uppercase tracking-wider mb-2">Nom</label>
+                      <input
+                        type="text"
+                        value={selectedLogement.nom}
+                        onChange={(e) => setSelectedLogement({...selectedLogement, nom: e.target.value})}
+                        className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-primary-500 uppercase tracking-wider mb-2">Typologie</label>
+                      <input
+                        type="text"
+                        value={selectedLogement.typologie}
+                        onChange={(e) => setSelectedLogement({...selectedLogement, typologie: e.target.value})}
+                        className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-primary-500 uppercase tracking-wider mb-2">Ville</label>
+                      <input
+                        type="text"
+                        value={selectedLogement.ville}
+                        onChange={(e) => setSelectedLogement({...selectedLogement, ville: e.target.value})}
+                        className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-primary-500 uppercase tracking-wider mb-2">Pays</label>
+                      <input
+                        type="text"
+                        value={selectedLogement.country}
+                        onChange={(e) => setSelectedLogement({...selectedLogement, country: e.target.value})}
+                        className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-primary-500 uppercase tracking-wider mb-2">Capacité</label>
+                      <input
+                        type="number"
+                        value={selectedLogement.capacite}
+                        onChange={(e) => setSelectedLogement({...selectedLogement, capacite: parseInt(e.target.value)})}
+                        className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-primary-500 uppercase tracking-wider mb-2">Chambres</label>
+                      <input
+                        type="number"
+                        value={selectedLogement.nbrChambre}
+                        onChange={(e) => setSelectedLogement({...selectedLogement, nbrChambre: parseInt(e.target.value)})}
+                        className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-primary-500 uppercase tracking-wider mb-2">Lits</label>
+                      <input
+                        type="number"
+                        value={selectedLogement.nbrLit}
+                        onChange={(e) => setSelectedLogement({...selectedLogement, nbrLit: parseInt(e.target.value)})}
+                        className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-secondary-500 uppercase tracking-wider mb-2">Prix de base (€)</label>
+                      <input
+                        type="number"
+                        value={selectedLogement.basePrice}
+                        onChange={(e) => setSelectedLogement({...selectedLogement, basePrice: parseFloat(e.target.value)})}
+                        className="w-full px-4 py-2 bg-bleu-fonce/50 border border-secondary-500/30 rounded-lg text-blanc-pur focus:border-secondary-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-secondary-500 uppercase tracking-wider mb-2">Prix min (€)</label>
+                      <input
+                        type="number"
+                        value={selectedLogement.minPrice}
+                        onChange={(e) => setSelectedLogement({...selectedLogement, minPrice: parseFloat(e.target.value)})}
+                        className="w-full px-4 py-2 bg-bleu-fonce/50 border border-secondary-500/30 rounded-lg text-blanc-pur focus:border-secondary-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-secondary-500 uppercase tracking-wider mb-2">Prix max (€)</label>
+                      <input
+                        type="number"
+                        value={selectedLogement.maxPrice}
+                        onChange={(e) => setSelectedLogement({...selectedLogement, maxPrice: parseFloat(e.target.value)})}
+                        className="w-full px-4 py-2 bg-bleu-fonce/50 border border-secondary-500/30 rounded-lg text-blanc-pur focus:border-secondary-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-primary-500 uppercase tracking-wider mb-2">Offset (%)</label>
+                    <input
+                      type="number"
+                      value={selectedLogement.offset}
+                      onChange={(e) => setSelectedLogement({...selectedLogement, offset: parseFloat(e.target.value)})}
+                      className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-primary-500 uppercase tracking-wider mb-2">Statut</label>
+                    <div className="flex items-center space-x-4">
+                      <button
+                        onClick={() => setSelectedLogement({...selectedLogement, actif: !selectedLogement.actif})}
+                        className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-300 ${
+                          selectedLogement.actif
+                            ? 'bg-primary-500/20 border border-primary-500'
+                            : 'bg-gray-500/20 border border-gray-500/50'
+                        }`}
+                      >
+                        <Power className={`w-5 h-5 ${selectedLogement.actif ? 'text-primary-500' : 'text-gray-500'}`} />
+                        <span className={`font-bold ${selectedLogement.actif ? 'text-primary-500' : 'text-gray-500'}`}>
+                          {selectedLogement.actif ? 'ACTIF' : 'INACTIF'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex space-x-4 mt-6 pt-6 border-t border-primary-500/20">
+                  <button
+                    onClick={() => setShowEditModal(false)}
+                    className="flex-1 px-6 py-3 bg-bleu-fonce/50 border border-blanc-pur/30 rounded-lg text-blanc-pur hover:border-blanc-pur transition-all duration-300"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={handleEditSave}
+                    className="flex-1 px-6 py-3 bg-gradient-primary rounded-lg text-noir-absolu font-bold hover:scale-105 transition-all duration-300 shadow-neon-gradient"
+                  >
+                    Enregistrer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

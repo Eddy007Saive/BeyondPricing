@@ -1,8 +1,8 @@
 import axios from "axios";
 
 // Configuration Airtable
-const AIRTABLE_BASE_ID =import.meta.env.VITE_APP_AIRTABLE_BASE_ID;
-const AIRTABLE_TABLE_NAME = 'Table_Scoring_Journalier'
+const AIRTABLE_BASE_ID = import.meta.env.VITE_APP_AIRTABLE_BASE_ID;
+const AIRTABLE_TABLE_NAME = "Logs_calcul"; // <-- nom exact fourni
 const AIRTABLE_API_KEY =
   import.meta.env.VITE_APP_AIRTABLE_API_KEY || "your_api_key";
 
@@ -14,7 +14,9 @@ const airtableClient = axios.create({
   },
 });
 
-// Créer un nouvel enregistrement
+// ---------------------------
+// Create
+// ---------------------------
 export const createScoring = async (scoringData) => {
   try {
     const response = await airtableClient.post(`/${AIRTABLE_TABLE_NAME}`, {
@@ -40,28 +42,65 @@ export const createScoring = async (scoringData) => {
   }
 };
 
-// Fonction de tri côté client
+// ---------------------------
+// Utilitaires : tri & filtre côté client
+// ---------------------------
+const mapFieldName = (fieldName) => {
+  // map des clefs "logiques" vers les noms réels dans Logs_calcul
+  const fieldMapping = {
+    // clés usuelles utilisées dans le front / API
+    date: "date",
+    prixMarche: "prix_calcule",
+    prixActuel: "prix_actuel",
+    tension: "tension_marche",
+    meteo: "meteo_score",
+    tauxOccupation: "occupation_secteur",
+    evenement: "intensite_evenement",
+    tarifIA: "prix_applique",
+    promoIA: "promo",
+    idLogement: "Beds24",
+    minPrice: "min_stay",
+    idBeds24: "id_beds24",
+    action: "action_push",
+    weekEnd: "is_holydays",
+    facteursRisque: "erreur",
+    joursFerie: "is_ferier",
+    impactMeteo: "meteo_score",
+    confiance: "S_base",
+    strategie: "M_details",
+    run_id: "run_id",
+    horodatage: "horodatage",
+    Ville: "Ville",
+    Famille: "Famille",
+  };
+
+  return fieldMapping[fieldName] || fieldName;
+};
+
 const sortRecords = (records, sortBy, sortOrder) => {
   if (!sortBy) return records;
 
   return records.sort((a, b) => {
-    const aValue = a.fields[mapFieldName(sortBy)];
-    const bValue = b.fields[mapFieldName(sortBy)];
+    const field = mapFieldName(sortBy);
+    const aValue = a.fields?.[field];
+    const bValue = b.fields?.[field];
 
-    // Gestion des valeurs nulles/undefined
     if (aValue === null || aValue === undefined) return 1;
     if (bValue === null || bValue === undefined) return -1;
 
-    // Comparaison selon le type
     let comparison = 0;
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
+
+    // Gérer les dates (si le champ ressemble à une date ISO)
+    const maybeDateA = typeof aValue === "string" && /^\d{4}-\d{2}-\d{2}/.test(aValue);
+    const maybeDateB = typeof bValue === "string" && /^\d{4}-\d{2}-\d{2}/.test(bValue);
+
+    if (maybeDateA && maybeDateB) {
+      comparison = new Date(aValue).getTime() - new Date(bValue).getTime();
+    } else if (typeof aValue === "string" && typeof bValue === "string") {
       comparison = aValue.toLowerCase().localeCompare(bValue.toLowerCase());
-    } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+    } else if (typeof aValue === "number" && typeof bValue === "number") {
       comparison = aValue - bValue;
-    } else if (aValue instanceof Date && bValue instanceof Date) {
-      comparison = aValue.getTime() - bValue.getTime();
     } else {
-      // Conversion en string pour autres types
       comparison = String(aValue).localeCompare(String(bValue));
     }
 
@@ -69,34 +108,41 @@ const sortRecords = (records, sortBy, sortOrder) => {
   });
 };
 
-// Fonction de recherche côté client
 const filterRecords = (records, search) => {
   if (!search) return records;
 
   const searchLower = search.toLowerCase();
+
   return records.filter((record) => {
+    const f = record.fields || {};
+
     const searchFields = [
-      record.fields["Id_logement"],
-      record.fields["ID Beds24 (from Id_logement)"],
-      record.fields["Justification"],
-      record.fields["action"],
-      record.fields["strategie"]
+      f["Beds24"],
+      f["id_beds24"],
+      f["Famille"],
+      f["Ville"],
+      f["M_details"],
+      f["action_push"],
+      f["raison_skip"],
+      f["erreur"],
     ];
 
-    return searchFields.some((field) => 
+    return searchFields.some((field) =>
       field && String(field).toLowerCase().includes(searchLower)
     );
   });
 };
 
-// Récupérer avec pagination / recherche / tri (gère +100 enregistrements)
+// ---------------------------
+// getScorings : récupération complète + tri/recherche/pagination côté client
+// ---------------------------
 export const getScorings = async (params = {}) => {
   try {
     const {
       page = 1,
       limit = 100,
       search = "",
-      sortBy = "Date",
+      sortBy = "date",
       sortOrder = "ASC",
     } = params;
 
@@ -110,9 +156,6 @@ export const getScorings = async (params = {}) => {
         ...(offset && { offset }),
       };
 
-      // On enlève le tri et la recherche côté serveur pour éviter l'erreur PRO
-      // Le tri et la recherche se feront côté client
-
       const response = await airtableClient.get(`/${AIRTABLE_TABLE_NAME}`, {
         params: airtableParams,
       });
@@ -121,10 +164,10 @@ export const getScorings = async (params = {}) => {
       offset = response.data.offset;
     } while (offset);
 
-    // Appliquer la recherche côté client
+    // Recherche côté client
     let filteredRecords = filterRecords(allRecords, search);
 
-    // Appliquer le tri côté client
+    // Tri côté client
     let sortedRecords = sortRecords(filteredRecords, sortBy, sortOrder);
 
     // Pagination côté client
@@ -135,25 +178,29 @@ export const getScorings = async (params = {}) => {
 
     const transformedRecords = paginatedRecords.map((record) => ({
       id: record.id,
-      date: record.fields["Date"] || "",
-      prixMarche: record.fields["Prix moyen marché"] || 0,
-      tension: record.fields["Tension marché"] || "",
-      meteo: record.fields["Météo"] || "",
-      tauxOccupation: record.fields["Taux occupation marché"] || "",
-      evenement: record.fields["Événement"] || "",
-      tarifIA: record.fields["Tarif IA recommandé"] || 0,
-      promoIA: record.fields["Promo IA"] || "",
-      idLogement: record.fields["Id_logement"] || "",
-      minPrice: record.fields["MinPrice"] || 0,
-      idBeds24: record.fields["ID Beds24 (from Id_logement)"] || "",
-      justification: record.fields["Justification"] || "",
-      weekEnd: record.fields["week_end"] || "",
-      facteursRisque: record.fields["facteurs_risque"] || "",
-      action: record.fields["action"] || "",
-      joursFerie: record.fields["Jours_ferie"] || "",
-      impactMeteo: record.fields["impact_météo"] || "",
-      confiance: record.fields["confiance"] || "",
-      strategie: record.fields["strategie"] || "",
+      run_id: record.fields["run_id"] ?? "",
+      horodatage: record.fields["horodatage"] ?? "",
+      date: record.fields["date"] ?? "",
+      Beds24: record.fields["Beds24"] ?? "",
+      id_beds24: record.fields["id_beds24"] ?? "",
+      Famille: record.fields["Famille"] ?? "",
+      Ville: record.fields["Ville"] ?? "",
+      S_base: record.fields["S_base"] ?? "",
+      M_details: record.fields["M_details"] ?? "",
+      prix_actuel: record.fields["prix_actuel"] ?? 0,
+      prix_calcule: record.fields["prix_calcule"] ?? 0,
+      prix_applique: record.fields["prix_applique"] ?? 0,
+      min_stay: record.fields["min_stay"] ?? 0,
+      promo: record.fields["promo"] ?? "",
+      action_push: record.fields["action_push"] ?? "",
+      raison_skip: record.fields["raison_skip"] ?? "",
+      occupation_secteur: record.fields["occupation_secteur"] ?? "",
+      tension_marche: record.fields["tension_marche"] ?? "",
+      intensite_evenement: record.fields["intensite_evenement"] ?? "",
+      meteo_score: record.fields["meteo_score"] ?? "",
+      erreur: record.fields["erreur"] ?? "",
+      is_holydays: record.fields["is_holydays"] ?? "",
+      is_ferier: record.fields["is_ferier"] ?? "",
     }));
 
     const totalPages = Math.ceil(totalItems / limit);
@@ -172,22 +219,23 @@ export const getScorings = async (params = {}) => {
   }
 };
 
-// Version optimisée pour les grosses bases de données
+// ---------------------------
+// Version optimisée (limite en cas de recherche) pour grosses bases
+// ---------------------------
 export const getScoringsOptimized = async (params = {}) => {
   try {
     const {
       page = 1,
       limit = 100,
       search = "",
-      sortBy = "Date",
+      sortBy = "date",
       sortOrder = "ASC",
     } = params;
 
     let allRecords = [];
     let offset = "";
-    
-    // Limiter le nombre d'enregistrements récupérés si on a une recherche
-    const maxRecords = search ? 1000 : limit * 10; // Récupérer plus si recherche
+
+    const maxRecords = search ? 1000 : limit * 10;
 
     do {
       let airtableParams = {
@@ -203,18 +251,16 @@ export const getScoringsOptimized = async (params = {}) => {
       offset = response.data.offset;
     } while (offset && allRecords.length < maxRecords);
 
-    // Traitement côté client
     let processedRecords = allRecords;
-    
+
     if (search) {
       processedRecords = filterRecords(processedRecords, search);
     }
-    
+
     if (sortBy) {
       processedRecords = sortRecords(processedRecords, sortBy, sortOrder);
     }
 
-    // Pagination
     const totalItems = processedRecords.length;
     const start = (page - 1) * limit;
     const end = start + limit;
@@ -222,25 +268,29 @@ export const getScoringsOptimized = async (params = {}) => {
 
     const transformedRecords = paginatedRecords.map((record) => ({
       id: record.id,
-      date: record.fields["Date"] || "",
-      prixMarche: record.fields["Prix moyen marché"] || 0,
-      tension: record.fields["Tension marché"] || "",
-      meteo: record.fields["Météo"] || "",
-      tauxOccupation: record.fields["Taux occupation marché"] || "",
-      evenement: record.fields["Événement"] || "",
-      tarifIA: record.fields["Tarif IA recommandé"] || 0,
-      promoIA: record.fields["Promo IA"] || "",
-      idLogement: record.fields["Id_logement"] || "",
-      minPrice: record.fields["MinPrice"] || 0,
-      idBeds24: record.fields["ID Beds24 (from Id_logement)"] || "",
-      justification: record.fields["Justification"] || "",
-      weekEnd: record.fields["week_end"] || "",
-      facteursRisque: record.fields["facteurs_risque"] || "",
-      action: record.fields["action"] || "",
-      joursFerie: record.fields["Jours_ferie"] || "",
-      impactMeteo: record.fields["impact_météo"] || "",
-      confiance: record.fields["confiance"] || "",
-      strategie: record.fields["strategie"] || "",
+      run_id: record.fields["run_id"] ?? "",
+      horodatage: record.fields["horodatage"] ?? "",
+      date: record.fields["date"] ?? "",
+      Beds24: record.fields["Beds24"] ?? "",
+      id_beds24: record.fields["id_beds24"] ?? "",
+      Famille: record.fields["Famille"] ?? "",
+      Ville: record.fields["Ville"] ?? "",
+      S_base: record.fields["S_base"] ?? "",
+      M_details: record.fields["M_details"] ?? "",
+      prix_actuel: record.fields["prix_actuel"] ?? 0,
+      prix_calcule: record.fields["prix_calcule"] ?? 0,
+      prix_applique: record.fields["prix_applique"] ?? 0,
+      min_stay: record.fields["min_stay"] ?? 0,
+      promo: record.fields["promo"] ?? "",
+      action_push: record.fields["action_push"] ?? "",
+      raison_skip: record.fields["raison_skip"] ?? "",
+      occupation_secteur: record.fields["occupation_secteur"] ?? "",
+      tension_marche: record.fields["tension_marche"] ?? "",
+      intensite_evenement: record.fields["intensite_evenement"] ?? "",
+      meteo_score: record.fields["meteo_score"] ?? "",
+      erreur: record.fields["erreur"] ?? "",
+      is_holydays: record.fields["is_holydays"] ?? "",
+      is_ferier: record.fields["is_ferier"] ?? "",
     }));
 
     const totalPages = Math.ceil(totalItems / limit);
@@ -259,36 +309,40 @@ export const getScoringsOptimized = async (params = {}) => {
   }
 };
 
-// Récupérer par ID
+// ---------------------------
+// getById
+// ---------------------------
 export const getScoringById = async (id) => {
   try {
-    const response = await airtableClient.get(
-      `/${AIRTABLE_TABLE_NAME}/${id}`
-    );
+    const response = await airtableClient.get(`/${AIRTABLE_TABLE_NAME}/${id}`);
 
     const record = response.data;
     return {
       data: {
         id: record.id,
-        date: record.fields["Date"] || "",
-        prixMarche: record.fields["Prix moyen marché"] || 0,
-        tension: record.fields["Tension marché"] || "",
-        meteo: record.fields["Météo"] || "",
-        tauxOccupation: record.fields["Taux occupation marché"] || "",
-        evenement: record.fields["Événement"] || "",
-        tarifIA: record.fields["Tarif IA recommandé"] || 0,
-        promoIA: record.fields["Promo IA"] || "",
-        idLogement: record.fields["Id_logement"] || "",
-        minPrice: record.fields["MinPrice"] || 0,
-        idBeds24: record.fields["ID Beds24 (from Id_logement)"] || "",
-        justification: record.fields["Justification"] || "",
-        weekEnd: record.fields["week_end"] || "",
-        facteursRisque: record.fields["facteurs_risque"] || "",
-        action: record.fields["action"] || "",
-        joursFerie: record.fields["Jours_ferie"] || "",
-        impactMeteo: record.fields["impact_météo"] || "",
-        confiance: record.fields["confiance"] || "",
-        strategie: record.fields["strategie"] || "",
+        run_id: record.fields["run_id"] ?? "",
+        horodatage: record.fields["horodatage"] ?? "",
+        date: record.fields["date"] ?? "",
+        Beds24: record.fields["Beds24"] ?? "",
+        id_beds24: record.fields["id_beds24"] ?? "",
+        Famille: record.fields["Famille"] ?? "",
+        Ville: record.fields["Ville"] ?? "",
+        S_base: record.fields["S_base"] ?? "",
+        M_details: record.fields["M_details"] ?? "",
+        prix_actuel: record.fields["prix_actuel"] ?? 0,
+        prix_calcule: record.fields["prix_calcule"] ?? 0,
+        prix_applique: record.fields["prix_applique"] ?? 0,
+        min_stay: record.fields["min_stay"] ?? 0,
+        promo: record.fields["promo"] ?? "",
+        action_push: record.fields["action_push"] ?? "",
+        raison_skip: record.fields["raison_skip"] ?? "",
+        occupation_secteur: record.fields["occupation_secteur"] ?? "",
+        tension_marche: record.fields["tension_marche"] ?? "",
+        intensite_evenement: record.fields["intensite_evenement"] ?? "",
+        meteo_score: record.fields["meteo_score"] ?? "",
+        erreur: record.fields["erreur"] ?? "",
+        is_holydays: record.fields["is_holydays"] ?? "",
+        is_ferier: record.fields["is_ferier"] ?? "",
       },
     };
   } catch (error) {
@@ -297,7 +351,9 @@ export const getScoringById = async (id) => {
   }
 };
 
-// Mettre à jour
+// ---------------------------
+// update
+// ---------------------------
 export const updateScoring = async (id, scoringData) => {
   try {
     const response = await airtableClient.patch(
@@ -326,7 +382,9 @@ export const updateScoring = async (id, scoringData) => {
   }
 };
 
-// Supprimer
+// ---------------------------
+// delete
+// ---------------------------
 export const deleteScoring = async (id) => {
   try {
     await airtableClient.delete(`/${AIRTABLE_TABLE_NAME}/${id}`);
@@ -349,196 +407,180 @@ export const deleteScoring = async (id) => {
   }
 };
 
-// Mapping pour les tris
-const mapFieldName = (fieldName) => {
-  const fieldMapping = {
-    date: "Date",
-    prixMarche: "Prix moyen marché",
-    tension: "Tension marché",
-    meteo: "Météo",
-    tauxOccupation: "Taux occupation marché",
-    evenement: "Événement",
-    tarifIA: "Tarif IA recommandé",
-    promoIA: "Promo IA",
-    idLogement: "Id_logement",
-    minPrice: "MinPrice",
-    idBeds24: "ID Beds24 (from Id_logement)",
-    justification: "Justification",
-    weekEnd: "week_end",
-    facteursRisque: "facteurs_risque",
-    action: "action",
-    joursFerie: "Jours_ferie",
-    impactMeteo: "impact_météo",
-    confiance: "confiance",
-    strategie: "strategie",
-  };
-
-  return fieldMapping[fieldName] || fieldName;
-};
-
-// Ajouter cette fonction dans le service scoring.js
 
 export const getScoringsByLogement = async (logementId, params = {}) => {
+  console.log(logementId);
+  
   try {
     const {
-      search = '',
-      dateFrom = '',
-      dateTo = '',
-      sortBy = 'Date',
-      sortOrder = 'ASC'
+      search = "",
+      dateFrom = "",
+      dateTo = "",
+      sortBy = "date",
+      sortOrder = "ASC",
     } = params;
 
-    // Construire les filtres Airtable
     let filters = [];
 
-    // Filtre principal par logement (recherche dans les deux champs possibles)
-    filters.push(`OR(
-      {Id_logement} = "${logementId}",
-      FIND("${logementId}", ARRAYJOIN({ID Beds24 (from Id_logement)}))
-    )`);
+    filters.push(`
+      FIND("${logementId}", ARRAYJOIN({Beds24}))
+    `);
 
-    // Filtre par recherche générale
+    // Filtre recherche générale (champ 'recherche', action_push, M_details, raison_skip)
     if (search) {
-      filters.push(`OR(
-        SEARCH(LOWER("${search}"), LOWER({Justification})),
-        SEARCH(LOWER("${search}"), LOWER({strategie})),
-        SEARCH(LOWER("${search}"), LOWER({action})),
-        SEARCH(LOWER("${search}"), LOWER({Tension marché}))
-      )`);
+      filters.push(
+        `OR(
+          SEARCH(LOWER("${search}"), LOWER({action_push})),
+          SEARCH(LOWER("${search}"), LOWER({raison_skip}))
+        )`
+      );
     }
 
-    // Filtre par plage de dates
+    // Filtre par dates
     if (dateFrom) {
-      filters.push(`{Date} >= "${dateFrom}"`);
+      filters.push(`{date} >= "${dateFrom}"`);
     }
     if (dateTo) {
-      filters.push(`{Date} <= "${dateTo}"`);
+      filters.push(`{date} <= "${dateTo}"`);
     }
 
     let airtableParams = {
       pageSize: 100,
-      view: "TriePardate",
+      view: "Grid view",
       fields: [
-        'Date',
-        'Prix moyen marché',
-        'Tension marché',
-        'Météo',
-        'Taux occupation marché',
-        'Événement',
-        'Tarif IA recommandé',
-        'Promo IA',
-        'Id_logement',
-        'MinPrice',
-        'ID Beds24 (from Id_logement)',
-        'Justification',
-        'week_end',
-        'facteurs_risque',
-        'action',
-        'Jours_ferie',
-        'impact_météo',
-        'confiance',
-        'strategie'
+        "run_id",
+        "horodatage",
+        "date",
+        "Beds24",
+        "id_beds24",
+        "Famille",
+        "Ville",
+        "S_base",
+        "M_details",
+        "prix_actuel",
+        "prix_calcule",
+        "prix_applique",
+        "min_stay",
+        "promo",
+        "action_push",
+        "raison_skip",
+        "occupation_secteur",
+        "tension_marche",
+        "intensite_evenement",
+        "meteo_score",
+        "erreur",
+        "is_holydays",
+        "is_ferier",
       ],
-      filterByFormula: filters.length === 1 ? filters[0] : `AND(${filters.join(', ')})`
+      filterByFormula:
+        filters.length === 1 ? filters[0] : `AND(${filters.join(", ")})`,
     };
 
     // Tri
     if (sortBy && mapFieldName(sortBy)) {
-      const direction = sortOrder === 'DESC' ? 'desc' : 'asc';
+      const direction = sortOrder === "DESC" ? "desc" : "asc";
       airtableParams.sort = [{ field: mapFieldName(sortBy), direction }];
     }
 
-    // Récupérer tous les enregistrements avec pagination
+    // Pagination serveur + récupération
     let allRecords = [];
-    let offset = '';
+    let offset = "";
 
     do {
       if (offset) {
         airtableParams.offset = offset;
       }
 
-      console.log('Fetching with params:', airtableParams);
-      
+      console.log("Fetching with params:", airtableParams);
 
       const response = await airtableClient.get(`/${AIRTABLE_TABLE_NAME}`, {
-        params: airtableParams
+        params: airtableParams,
       });
-      console.log("data",response.data);
-      
+      console.log("data", response.data);
 
       allRecords = [...allRecords, ...response.data.records];
       offset = response.data.offset;
       delete airtableParams.offset;
     } while (offset);
 
-    // Transformation des données
     const transformedRecords = allRecords.map((record) => ({
       id: record.id,
-      date: record.fields["Date"] || "",
-      prixMarche: record.fields["Prix moyen marché"] || 0,
-      tension: record.fields["Tension marché"] || "",
-      meteo: record.fields["Météo"] || "",
-      tauxOccupation: record.fields["Taux occupation marché"] || "",
-      evenement: record.fields["Événement"] || "",
-      tarifIA: record.fields["Tarif IA recommandé"] || 0,
-      promoIA: record.fields["Promo IA"] || "",
-      idLogement: record.fields["Id_logement"] || "",
-      minPrice: record.fields["MinPrice"] || 0,
-      idBeds24: record.fields["ID Beds24 (from Id_logement)"] || "",
-      justification: record.fields["Justification"] || "",
-      weekEnd: record.fields["week_end"] || "",
-      facteursRisque: record.fields["facteurs_risque"] || "",
-      action: record.fields["action"] || "",
-      joursFerie: record.fields["Jours_ferie"] || "",
-      impactMeteo: record.fields["impact_météo"] || "",
-      confiance: record.fields["confiance"] || "",
-      strategie: record.fields["strategie"] || "",
+      run_id: record.fields["run_id"] ?? "",
+      horodatage: record.fields["horodatage"] ?? "",
+      date: record.fields["date"] ?? "",
+      Beds24: record.fields["Beds24"] ?? "",
+      id_beds24: record.fields["id_beds24"] ?? "",
+      Famille: record.fields["Famille"] ?? "",
+      Ville: record.fields["Ville"] ?? "",
+      S_base: record.fields["S_base"] ?? "",
+      M_details: JSON.parse(record.fields.M_details) ?? "",
+      prix_actuel: record.fields["prix_actuel"] ?? 0,
+      prix_calcule: record.fields["prix_calcule"] ?? 0,
+      prix_applique: record.fields["prix_applique"] ?? 0,
+      min_stay: record.fields["min_stay"] ?? 0,
+      promo: record.fields["promo"] ?? 0,
+      action_push: record.fields["action_push"] ?? false,
+      raison_skip: record.fields["raison_skip"] ?? "",
+      occupation_secteur: record.fields["occupation_secteur"] ?? 0,
+      tension_marche: record.fields["tension_marche"] ?? 0,
+      intensite_evenement: record.fields["intensite_evenement"] ?? 0,
+      meteo_score: record.fields["meteo_score"] ?? "",
+      erreur: record.fields["erreur"] ?? "",
+      is_holydays: record.fields["is_holydays"] ?? false,
+      is_ferier: record.fields["is_ferier"] ?? false,
+      jour_semaine: record.fields["jour_semaine"] ?? "",
+
+
     }));
 
-    console.log(`Scorings trouvés pour le logement ${logementId}:`, transformedRecords.length);
+    console.log(
+      `Scorings trouvés pour le logement ${logementId}:`,
+      transformedRecords.length
+    );
 
     return {
       data: {
         scorings: transformedRecords,
         totalItems: transformedRecords.length,
-        logementId: logementId
-      }
+        logementId: logementId,
+      },
     };
   } catch (error) {
-    console.error('Erreur lors de la récupération des scorings par logement:', error);
+    console.log(
+      "Erreur lors de la récupération des scorings par logement:",
+      error
+    );
     throw error;
   }
 };
 
-// Version encore plus optimisée avec cache
+// ---------------------------
+// Cache + getScoringsByLogementCached
+// ---------------------------
 let scoringCache = new Map();
 
 export const getScoringsByLogementCached = async (logementId, params = {}) => {
   const cacheKey = `${logementId}-${JSON.stringify(params)}`;
-  
-  // Vérifier le cache (valide pendant 5 minutes)
+
   if (scoringCache.has(cacheKey)) {
     const cached = scoringCache.get(cacheKey);
     const now = new Date().getTime();
-    if (now - cached.timestamp < 5 * 60 * 1000) { // 5 minutes
-      console.log('Données récupérées depuis le cache');
+    if (now - cached.timestamp < 5 * 60 * 1000) {
+      console.log("Données récupérées depuis le cache");
       return cached.data;
     }
   }
 
-  // Récupérer les données
   const result = await getScoringsByLogement(logementId, params);
-  
-  // Mettre en cache
+
   scoringCache.set(cacheKey, {
     data: result,
-    timestamp: new Date().getTime()
+    timestamp: new Date().getTime(),
   });
 
   return result;
 };
 
-// Fonction pour nettoyer le cache
 export const clearScoringCache = () => {
   scoringCache.clear();
 };

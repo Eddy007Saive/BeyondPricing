@@ -22,7 +22,7 @@ export function Dashboard() {
   const routesWithNotifications = getRoutesWithNotifications(unreadCount, isLoading);
 
   return (
-    <div className="min-h-screen bg-blue-gray-50/50">
+    <div className="bg-gradient-background">
       <Sidenav
         routes={routesWithNotifications}
         brandName="Zéro Homme"

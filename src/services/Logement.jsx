@@ -143,19 +143,21 @@ export const getLogements = async (params = {}) => {
       country: record.fields["country"] || "",
       state: record.fields["state"] || "",
       nbrLit: record.fields["Nbr_lit"] || 0,
-      tableScoringJournalier: record.fields["Table_Scoring_Journalier 2"] || "",
+      tableScoringJournalier: record.fields["Logs_calcul"] || "",
       roomType: record.fields["roomType"] || "",
       nbrChambre: record.fields["Nbr_chambre"] || 0,
       minStay: record.fields["minStay"] || 0,
       maxStay: record.fields["maxStay"] || 0,
       minPrice: record.fields["MinPrice"] || 0,
-      offset: record.fields["Offset"] || 0,
       analyser: record.fields["analyser"] || "",
       scrape: record.fields["Scrape"] || "En attente",
       predit: record.fields["predit"] || "Non",
-      instructions:record.fields["instructions"] || "",
       maxPrice:record.fields["MaxPrice"] || 0,
       offset:record.fields["Offset"] * 100  || 0,
+      basePrice:record.fields["BasePrice"]|| 0,
+      famille:record.fields["Famille"],
+      etat:record.fields["Etat"] || false,
+
 
     }));
 

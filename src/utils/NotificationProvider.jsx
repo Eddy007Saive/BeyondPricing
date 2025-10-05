@@ -17,17 +17,12 @@ const fetchUnreadCount = useCallback(async () => {
 
   // Fonction pour forcer la mise à jour
   const refreshCount = useCallback(() => {
-    fetchUnreadCount();
   }, [fetchUnreadCount]);
 
   // Fonction pour marquer comme lu et rafraîchir
   const markAsReadAndRefresh = useCallback(async (markAsReadFunction) => {
     try {
-      await markAsReadFunction();
-      // Attendre un peu avant de rafraîchir pour laisser le temps à Airtable de se mettre à jour
-      setTimeout(() => {
-        fetchUnreadCount();
-      }, 1000);
+
     } catch (error) {
       console.error('Erreur lors du marquage comme lu:', error);
     }
@@ -44,42 +39,8 @@ const fetchUnreadCount = useCallback(async () => {
 
   }, [fetchUnreadCount]);
 
-  // Fonction pour arrêter le polling
-  const stopPolling = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  }, []);
 
-  // Initialisation
-  useEffect(() => {
-    fetchUnreadCount(); // Premier chargement
-    startPolling(); // Démarrer le polling
 
-    // Cleanup
-    return () => stopPolling();
-  }, [fetchUnreadCount, startPolling, stopPolling]);
-
-  // Écouter les événements de focus/blur de la fenêtre pour un rafraîchissement immédiat
-  useEffect(() => {
-    const handleFocus = () => {
-      fetchUnreadCount();
-      startPolling();
-    };
-
-    const handleBlur = () => {
-      stopPolling();
-    };
-
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('blur', handleBlur);
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('blur', handleBlur);
-    };
-  }, [fetchUnreadCount, startPolling, stopPolling]);
 
   const value = {
     unreadCount,
@@ -114,9 +75,6 @@ export const useWebSocketNotifications = (wsUrl) => {
     // Récupération initiale
     const fetchInitialCount = async () => {
       try {
-        const response = await getUnreadNotificationsCount();
-        setUnreadCount(response.data.count);
-        setIsLoading(false);
       } catch (error) {
         console.error('Erreur lors de la récupération initiale:', error);
         setIsLoading(false);
@@ -165,8 +123,6 @@ export const useWebSocketNotifications = (wsUrl) => {
 
   const refreshCount = useCallback(async () => {
     try {
-      const response = await getUnreadNotificationsCount();
-      setUnreadCount(response.data.count);
     } catch (error) {
       console.error('Erreur lors du rafraîchissement:', error);
     }
@@ -183,8 +139,6 @@ export const useNotificationEvents = () => {
   const fetchUnreadCount = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await getUnreadNotificationsCount();
-      setUnreadCount(response.data.count);
     } catch (error) {
       console.error('Erreur lors de la récupération:', error);
     } finally {
@@ -198,7 +152,6 @@ useEffect(() => {
     fetchUnreadCount();
   };
 
-  window.addEventListener('notificationUpdated', onUpdate);
 
   return () => {
     window.removeEventListener('notificationUpdated', onUpdate);
@@ -207,7 +160,6 @@ useEffect(() => {
 
 
   const refreshCount = useCallback(() => {
-    fetchUnreadCount();
   }, [fetchUnreadCount]);
 
   return { unreadCount, isLoading, refreshCount };
@@ -222,9 +174,7 @@ export const emitNotificationEvent = (eventType, detail = {}) => {
 // Exemple d'utilisation dans vos fonctions de service
 export const markNotificationAsReadWithEvent = async (id, markAsReadFunction) => {
   try {
-    await markAsReadFunction(id);
     // Déclencher l'événement pour mettre à jour le compteur partout
-    emitNotificationEvent('notificationRead');
   } catch (error) {
     console.error('Erreur lors du marquage comme lu:', error);
     throw error;

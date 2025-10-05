@@ -21,7 +21,6 @@ import { emitNotificationEvent } from '@/utils/NotificationProvider';
 const triggerNotificationUpdate = () => {
 
   
-  emitNotificationEvent('notificationUpdated');
 };
 
 

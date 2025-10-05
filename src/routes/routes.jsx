@@ -21,31 +21,8 @@ export const useUnreadNotifications = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchUnreadCount = async () => {
-    try {
-      setIsLoading(true);
-      const response = await getUnreadNotificationsCount();
-      console.log("rerer",response);
-      
-      setUnreadCount(response.data.count);
-    } catch (error) {
-      console.error('Erreur lors de la récupération du nombre de notifications non lues:', error);
-      setUnreadCount(0);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    fetchUnreadCount();
-
-    // Optionnel : actualiser périodiquement le compteur
-    const interval = setInterval(fetchUnreadCount, 30000); // Toutes les 30 secondes
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return { unreadCount, isLoading, refreshCount: fetchUnreadCount };
+  return {};
 };
 
 // Composant pour afficher le badge de notification
