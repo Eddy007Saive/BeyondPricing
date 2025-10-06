@@ -18,16 +18,6 @@ export function AppRoute() {
         <Route path="calendrier" element={<Calendrier />} />
         <Route path="logement" element={<Liste />} />
         <Route path="evenement" element={<ListeEvenements />} />
-
-
-
-
-
-
-
-
-
-
         {/* Redirection par défaut vers home */}
         <Route index element={<Navigate to="home" replace />} />
       </Route>

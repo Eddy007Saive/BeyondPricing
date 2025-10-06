@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit3, Save, X, Filter, ArrowUpDown, MapPin, Home, Users, Bed, Eye, Settings, MoreHorizontal, CheckCircle, Clock, AlertCircle, Euro, Trash2, Edit, Power } from 'lucide-react';
-import { getLogements,updateLogement } from '@/services/Logement';
+import { getLogements, updateLogement,deleteLogement  } from '@/services/Logement';
 
 export const Liste = () => {
   const [logements, setLogements] = useState([]);
@@ -29,31 +29,31 @@ export const Liste = () => {
     setCurrentPage(1);
   };
 
-  
-    const fetchLogements = async () => {
-      try {
-        setLoading(true);
-        const params = {
-          page: currentPage,
-          limit,
-          search: searchTerm,
-          sortBy,
-          sortOrder
-        };
-        
-        const response = await getLogements(params); // Remplacez par getLogements(params)
-        console.log(response.data.logements
-        );
-        
-        setLogements(response.data.logements);
-        setTotalPages(response.data.totalPages);
-        setTotalItems(response.data.totalItems);
-      } catch (error) {
-        console.error('Erreur lors du chargement:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+
+  const fetchLogements = async () => {
+    try {
+      setLoading(true);
+      const params = {
+        page: currentPage,
+        limit,
+        search: searchTerm,
+        sortBy,
+        sortOrder
+      };
+
+      const response = await getLogements(params);
+      console.log(response.data.logements
+      );
+
+      setLogements(response.data.logements);
+      setTotalPages(response.data.totalPages);
+      setTotalItems(response.data.totalItems);
+    } catch (error) {
+      console.error('Erreur lors du chargement:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSort = (column) => {
     if (sortBy === column) {
@@ -70,8 +70,42 @@ export const Liste = () => {
   };
 
   const handleSaveCell = async (logementId, field) => {
-    setEditingCell(null);
-    setEditingValue('');
+    try {
+      const fieldMapping = {
+        nom: 'Nom',
+        ville: 'Ville',
+        basePrice: 'BasePrice',
+        MinPrice: 'MinPrice',
+        MaxPrice: 'MaxPrice',
+        Offset: 'Offset',
+        instructions: 'Instructions'
+      };
+
+      const airtableField = fieldMapping[field] || field;
+      let valueToSave = editingValue;
+
+      // Conversion pour les champs numériques
+      if (['basePrice', 'MinPrice', 'MaxPrice'].includes(field)) {
+        valueToSave = parseFloat(editingValue);
+      } else if (field === 'Offset') {
+        valueToSave = parseFloat(editingValue) / 100; // Convertir en pourcentage pour Airtable
+      }
+
+      await updateLogement(logementId, { [airtableField]: valueToSave });
+
+      // Mise à jour locale
+      setLogements(prev =>
+        prev.map(log =>
+          log.id === logementId ? { ...log, [field]: editingValue } : log
+        )
+      );
+
+      setEditingCell(null);
+      setEditingValue('');
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      alert('Erreur lors de la sauvegarde');
+    }
   };
 
   const handleCancelEdit = () => {
@@ -80,13 +114,19 @@ export const Liste = () => {
   };
 
   const handleToggleActif = async (logementId, currentStatus) => {
-    setLogements(prev =>
-      prev.map(log =>
-        log.id === logementId ? { ...log, actif: !currentStatus } : log
-      )
-    );
-  };
+    try {
+      await updateLogement(logementId, { 'Etat': !currentStatus });
 
+      setLogements(prev =>
+        prev.map(log =>
+          log.id === logementId ? { ...log, etat: !currentStatus } : log
+        )
+      );
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error);
+      alert('Erreur lors de la mise à jour du statut');
+    }
+  };
   const handleDeleteClick = (logement) => {
     setSelectedLogement(logement);
     setShowDeleteModal(true);
@@ -98,21 +138,55 @@ export const Liste = () => {
   };
 
   const handleDeleteConfirm = async () => {
-    // Supprimer le logement
-    setLogements(prev => prev.filter(log => log.id !== selectedLogement.id));
-    setShowDeleteModal(false);
-    setSelectedLogement(null);
+    try {
+      await deleteLogement(selectedLogement.id);
+
+      setLogements(prev => prev.filter(log => log.id !== selectedLogement.id));
+      setShowDeleteModal(false);
+      setSelectedLogement(null);
+
+      // Recharger les données pour mettre à jour les totaux
+      fetchLogements();
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      alert('Erreur lors de la suppression du logement');
+    }
   };
 
   const handleEditSave = async () => {
-    // Sauvegarder les modifications
-    setLogements(prev =>
-      prev.map(log =>
-        log.id === selectedLogement.id ? selectedLogement : log
-      )
-    );
-    setShowEditModal(false);
-    setSelectedLogement(null);
+    try {
+      const updateData = {
+        'Nom': selectedLogement.nom,
+        'Typologie': selectedLogement.typologie,
+        'Ville': selectedLogement.ville,
+        'country': selectedLogement.country,
+        'Capacité': selectedLogement.capacite,
+        'Nbr_chambre': selectedLogement.nbrChambre,
+        'Nbr_lit': selectedLogement.nbrLit,
+        'BasePrice': selectedLogement.basePrice,
+        'MinPrice': selectedLogement.minPrice,
+        'MaxPrice': selectedLogement.maxPrice,
+        'Offset': selectedLogement.offset / 100, // Convertir en pourcentage pour Airtable
+        'Etat': selectedLogement.etat
+      };
+
+      await updateLogement(selectedLogement.id, updateData);
+
+      setLogements(prev =>
+        prev.map(log =>
+          log.id === selectedLogement.id ? selectedLogement : log
+        )
+      );
+
+      setShowEditModal(false);
+      setSelectedLogement(null);
+
+      // Recharger pour s'assurer de la cohérence
+      fetchLogements();
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      alert('Erreur lors de la sauvegarde des modifications');
+    }
   };
 
   const getStatusIcon = (scrape, predit) => {
@@ -159,7 +233,7 @@ export const Liste = () => {
     }
 
     return (
-      <div 
+      <div
         className={`group cursor-pointer hover:bg-primary-500/10 px-2 py-1 rounded transition-all duration-300 ${className}`}
         onClick={() => handleEditCell(logement.id, field, value)}
       >
@@ -193,7 +267,7 @@ export const Liste = () => {
         <svg className="w-full h-full">
           <defs>
             <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
-              <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#00CFFF" strokeWidth="0.5"/>
+              <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#00CFFF" strokeWidth="0.5" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" />
@@ -226,7 +300,7 @@ export const Liste = () => {
                   <div className="w-3 h-3 bg-primary-500 rounded-full animate-pulse"></div>
                   <div className="w-2 h-2 bg-secondary-500 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
                 </div>
-                
+
                 <h1 className="text-3xl font-bold text-blanc-pur tracking-[0.2em] uppercase relative">
                   <span className="relative z-10">LOGEMENTS</span>
                   <div className="absolute inset-0 bg-gradient-primary bg-clip-text text-transparent animate-pulse opacity-50"></div>
@@ -239,7 +313,7 @@ export const Liste = () => {
               </div>
 
               <div className="flex items-center space-x-3">
-                <button 
+                <button
                   onClick={() => setShowFilters(!showFilters)}
                   className="relative bg-gradient-to-r from-bleu-fonce/80 to-noir-absolu/80 text-primary-500 px-6 py-3 rounded-lg border border-primary-500/30 hover:border-primary-500 transition-all duration-300 overflow-hidden group"
                 >
@@ -422,21 +496,18 @@ export const Liste = () => {
                       <td className="px-6 py-4">
                         <button
                           onClick={() => handleToggleActif(logement.id, logement.etat)}
-                          className={`relative group flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                            logement.etat
+                          className={`relative group flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${logement.etat
                               ? 'bg-primary-500/20 border border-primary-500/50'
                               : 'bg-gray-500/20 border border-gray-500/50'
-                          }`}
+                            }`}
                         >
                           <Power
-                            className={`w-4 h-4 transition-colors ${
-                              logement.etat ? 'text-primary-500' : 'text-gray-500'
-                            }`}
+                            className={`w-4 h-4 transition-colors ${logement.etat ? 'text-primary-500' : 'text-gray-500'
+                              }`}
                           />
                           <span
-                            className={`text-sm font-bold ${
-                              logement.etat ? 'text-primary-500' : 'text-gray-500'
-                            }`}
+                            className={`text-sm font-bold ${logement.etat ? 'text-primary-500' : 'text-gray-500'
+                              }`}
                           >
                             {logement.etat ? 'ON' : 'OFF'}
                           </span>
@@ -450,14 +521,14 @@ export const Liste = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
-                          <button 
+                          <button
                             onClick={() => handleEditClick(logement)}
                             className="p-2 hover:bg-primary-500/20 rounded-lg transition-colors group"
                             title="Modifier"
                           >
                             <Edit className="w-4 h-4 text-primary-500 group-hover:scale-110 transition-transform" />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleDeleteClick(logement)}
                             className="p-2 hover:bg-secondary-500/20 rounded-lg transition-colors group"
                             title="Supprimer"
@@ -510,7 +581,7 @@ export const Liste = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-noir-absolu/80 backdrop-blur-sm">
             <div className="relative bg-gradient-to-br from-bleu-fonce via-noir-absolu to-bleu-fonce border border-secondary-500/50 rounded-xl p-8 max-w-md w-full shadow-neon-gradient">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-secondary-500 to-primary-500 opacity-20 blur-xl animate-pulse"></div>
-              
+
               <div className="relative z-10">
                 <div className="flex items-center space-x-4 mb-6">
                   <div className="w-12 h-12 bg-secondary-500/20 rounded-full flex items-center justify-center">
@@ -555,7 +626,7 @@ export const Liste = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-noir-absolu/80 backdrop-blur-sm overflow-y-auto">
             <div className="relative bg-gradient-to-br from-bleu-fonce via-noir-absolu to-bleu-fonce border border-primary-500/50 rounded-xl p-8 max-w-2xl w-full shadow-neon-gradient my-8">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-secondary-500 opacity-20 blur-xl animate-pulse"></div>
-              
+
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-4">
@@ -579,7 +650,7 @@ export const Liste = () => {
                       <input
                         type="text"
                         value={selectedLogement.nom}
-                        onChange={(e) => setSelectedLogement({...selectedLogement, nom: e.target.value})}
+                        onChange={(e) => setSelectedLogement({ ...selectedLogement, nom: e.target.value })}
                         className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
                       />
                     </div>
@@ -588,7 +659,7 @@ export const Liste = () => {
                       <input
                         type="text"
                         value={selectedLogement.typologie}
-                        onChange={(e) => setSelectedLogement({...selectedLogement, typologie: e.target.value})}
+                        onChange={(e) => setSelectedLogement({ ...selectedLogement, typologie: e.target.value })}
                         className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
                       />
                     </div>
@@ -600,7 +671,7 @@ export const Liste = () => {
                       <input
                         type="text"
                         value={selectedLogement.ville}
-                        onChange={(e) => setSelectedLogement({...selectedLogement, ville: e.target.value})}
+                        onChange={(e) => setSelectedLogement({ ...selectedLogement, ville: e.target.value })}
                         className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
                       />
                     </div>
@@ -609,7 +680,7 @@ export const Liste = () => {
                       <input
                         type="text"
                         value={selectedLogement.country}
-                        onChange={(e) => setSelectedLogement({...selectedLogement, country: e.target.value})}
+                        onChange={(e) => setSelectedLogement({ ...selectedLogement, country: e.target.value })}
                         className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
                       />
                     </div>
@@ -621,7 +692,7 @@ export const Liste = () => {
                       <input
                         type="number"
                         value={selectedLogement.capacite}
-                        onChange={(e) => setSelectedLogement({...selectedLogement, capacite: parseInt(e.target.value)})}
+                        onChange={(e) => setSelectedLogement({ ...selectedLogement, capacite: parseInt(e.target.value) })}
                         className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
                       />
                     </div>
@@ -630,7 +701,7 @@ export const Liste = () => {
                       <input
                         type="number"
                         value={selectedLogement.nbrChambre}
-                        onChange={(e) => setSelectedLogement({...selectedLogement, nbrChambre: parseInt(e.target.value)})}
+                        onChange={(e) => setSelectedLogement({ ...selectedLogement, nbrChambre: parseInt(e.target.value) })}
                         className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
                       />
                     </div>
@@ -639,7 +710,7 @@ export const Liste = () => {
                       <input
                         type="number"
                         value={selectedLogement.nbrLit}
-                        onChange={(e) => setSelectedLogement({...selectedLogement, nbrLit: parseInt(e.target.value)})}
+                        onChange={(e) => setSelectedLogement({ ...selectedLogement, nbrLit: parseInt(e.target.value) })}
                         className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
                       />
                     </div>
@@ -651,7 +722,7 @@ export const Liste = () => {
                       <input
                         type="number"
                         value={selectedLogement.basePrice}
-                        onChange={(e) => setSelectedLogement({...selectedLogement, basePrice: parseFloat(e.target.value)})}
+                        onChange={(e) => setSelectedLogement({ ...selectedLogement, basePrice: parseFloat(e.target.value) })}
                         className="w-full px-4 py-2 bg-bleu-fonce/50 border border-secondary-500/30 rounded-lg text-blanc-pur focus:border-secondary-500 focus:outline-none"
                       />
                     </div>
@@ -660,7 +731,7 @@ export const Liste = () => {
                       <input
                         type="number"
                         value={selectedLogement.minPrice}
-                        onChange={(e) => setSelectedLogement({...selectedLogement, minPrice: parseFloat(e.target.value)})}
+                        onChange={(e) => setSelectedLogement({ ...selectedLogement, minPrice: parseFloat(e.target.value) })}
                         className="w-full px-4 py-2 bg-bleu-fonce/50 border border-secondary-500/30 rounded-lg text-blanc-pur focus:border-secondary-500 focus:outline-none"
                       />
                     </div>
@@ -669,7 +740,7 @@ export const Liste = () => {
                       <input
                         type="number"
                         value={selectedLogement.maxPrice}
-                        onChange={(e) => setSelectedLogement({...selectedLogement, maxPrice: parseFloat(e.target.value)})}
+                        onChange={(e) => setSelectedLogement({ ...selectedLogement, maxPrice: parseFloat(e.target.value) })}
                         className="w-full px-4 py-2 bg-bleu-fonce/50 border border-secondary-500/30 rounded-lg text-blanc-pur focus:border-secondary-500 focus:outline-none"
                       />
                     </div>
@@ -680,7 +751,7 @@ export const Liste = () => {
                     <input
                       type="number"
                       value={selectedLogement.offset}
-                      onChange={(e) => setSelectedLogement({...selectedLogement, offset: parseFloat(e.target.value)})}
+                      onChange={(e) => setSelectedLogement({ ...selectedLogement, offset: parseFloat(e.target.value) })}
                       className="w-full px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:border-primary-500 focus:outline-none"
                     />
                   </div>
@@ -689,12 +760,11 @@ export const Liste = () => {
                     <label className="block text-xs text-primary-500 uppercase tracking-wider mb-2">Statut</label>
                     <div className="flex items-center space-x-4">
                       <button
-                        onClick={() => setSelectedLogement({...selectedLogement, actif: !selectedLogement.actif})}
-                        className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-300 ${
-                          selectedLogement.actif
+                        onClick={() => setSelectedLogement({ ...selectedLogement, actif: !selectedLogement.actif })}
+                        className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-300 ${selectedLogement.actif
                             ? 'bg-primary-500/20 border border-primary-500'
                             : 'bg-gray-500/20 border border-gray-500/50'
-                        }`}
+                          }`}
                       >
                         <Power className={`w-5 h-5 ${selectedLogement.actif ? 'text-primary-500' : 'text-gray-500'}`} />
                         <span className={`font-bold ${selectedLogement.actif ? 'text-primary-500' : 'text-gray-500'}`}>
