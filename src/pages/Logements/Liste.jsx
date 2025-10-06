@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit3, Save, X, Filter, ArrowUpDown, MapPin, Home, Users, Bed, Eye, Settings, MoreHorizontal, CheckCircle, Clock, AlertCircle, Euro, Trash2, Edit, Power } from 'lucide-react';
-import { getLogements, updateLogement,deleteLogement  } from '@/services/Logement';
+import { getLogements, updateLogement, deleteLogement ,getLogementsByView} from '@/services/Logement';
 
 export const Liste = () => {
   const [logements, setLogements] = useState([]);
@@ -31,29 +31,38 @@ export const Liste = () => {
 
 
   const fetchLogements = async () => {
-    try {
-      setLoading(true);
-      const params = {
-        page: currentPage,
-        limit,
-        search: searchTerm,
-        sortBy,
-        sortOrder
-      };
+  try {
+    setLoading(true);
+    const params = {
+      page: currentPage,
+      limit,
+      search: searchTerm,
+      sortBy,
+      sortOrder
+    };
 
-      const response = await getLogements(params);
-      console.log(response.data.logements
-      );
+    // Mapper les filtres vers les noms de vues Airtable
+    const viewMapping = {
+      'all': 'Grid view', // Vue par défaut
+      'actif': 'Logements Actifs', // Nom de votre vue dans Airtable
+      'inactif': 'Logements Inactifs',
+      'optimized': 'Logements Optimisés',
+      'analyzed': 'Logements Analysés',
+      'pending': 'En Attente'
+    };
 
-      setLogements(response.data.logements);
-      setTotalPages(response.data.totalPages);
-      setTotalItems(response.data.totalItems);
-    } catch (error) {
-      console.error('Erreur lors du chargement:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const viewName = viewMapping[filterStatus] || 'Grid view';
+    const response = await getLogementsByView(viewName, params);
+
+    setLogements(response.data.logements);
+    setTotalPages(response.data.totalPages);
+    setTotalItems(response.data.totalItems);
+  } catch (error) {
+    console.error('Erreur lors du chargement:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSort = (column) => {
     if (sortBy === column) {
@@ -247,9 +256,8 @@ export const Liste = () => {
 
   const filteredLogements = logements.filter(logement => {
     if (filterStatus === 'all') return true;
-    if (filterStatus === 'optimized') return logement.scrape === 'Fait' && logement.predit === 'Oui';
-    if (filterStatus === 'analyzed') return logement.scrape === 'Fait' && logement.predit === 'Non';
-    if (filterStatus === 'pending') return logement.scrape === 'En attente';
+    if (filterStatus === 'actif') return logement.etat === true;
+    if (filterStatus === 'inactif') return logement.etat === false;
     return true;
   });
 
@@ -319,7 +327,18 @@ export const Liste = () => {
                 >
                   <span className="relative z-10 flex items-center space-x-2">
                     <Filter className="w-4 h-4" />
-                    <span>Filtres</span>
+                      <div className="mt-4 flex items-center space-x-4">
+                <select
+                id="filter-status"
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="px-4 py-2 bg-bleu-fonce/50 border border-bleu-fonce-500/30 rounded-lg text-blanc-pur focus:outline-none focus:border-primary-500"
+                >
+                  <option value="all">Tous</option>
+                  <option value="actif">Actifs uniquement</option>
+                  <option value="inactif">Inactifs uniquement</option>
+                </select>
+              </div>
                   </span>
                   <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity"></div>
                 </button>
@@ -356,14 +375,14 @@ export const Liste = () => {
             {showFilters && (
               <div className="mt-4 flex items-center space-x-4">
                 <select
+                id="filter-status"
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                   className="px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:outline-none focus:border-primary-500"
                 >
                   <option value="all">Tous</option>
-                  <option value="optimized">Optimisés</option>
-                  <option value="analyzed">Analysés</option>
-                  <option value="pending">En attente</option>
+                  <option value="actif">Actifs uniquement</option>
+                  <option value="inactif">Inactifs uniquement</option>
                 </select>
               </div>
             )}
@@ -497,8 +516,8 @@ export const Liste = () => {
                         <button
                           onClick={() => handleToggleActif(logement.id, logement.etat)}
                           className={`relative group flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${logement.etat
-                              ? 'bg-primary-500/20 border border-primary-500/50'
-                              : 'bg-gray-500/20 border border-gray-500/50'
+                            ? 'bg-primary-500/20 border border-primary-500/50'
+                            : 'bg-gray-500/20 border border-gray-500/50'
                             }`}
                         >
                           <Power
@@ -762,8 +781,8 @@ export const Liste = () => {
                       <button
                         onClick={() => setSelectedLogement({ ...selectedLogement, actif: !selectedLogement.actif })}
                         className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-300 ${selectedLogement.actif
-                            ? 'bg-primary-500/20 border border-primary-500'
-                            : 'bg-gray-500/20 border border-gray-500/50'
+                          ? 'bg-primary-500/20 border border-primary-500'
+                          : 'bg-gray-500/20 border border-gray-500/50'
                           }`}
                       >
                         <Power className={`w-5 h-5 ${selectedLogement.actif ? 'text-primary-500' : 'text-gray-500'}`} />

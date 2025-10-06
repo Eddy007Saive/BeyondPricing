@@ -488,3 +488,132 @@ const mapFieldName = (fieldName) => {
 
   return fieldMapping[fieldName] || fieldName;
 };
+
+// Récupérer les logements par statut
+export const getLogementsByStatus = async (status, params = {}) => {
+  try {
+    // Récupérer tous les logements avec les params de base
+    const response = await getLogements(params);
+    
+    if (status === 'all') {
+      return response;
+    }
+
+    // Filtrer selon le statut
+    const filteredLogements = response.data.logements.filter((logement) => {
+      switch (status) {
+        case 'actif':
+          return logement.etat === true;
+        case 'inactif':
+          return logement.etat === false;
+        case 'optimized':
+          return logement.scrape === 'Fait' && logement.predit === 'Oui';
+        case 'analyzed':
+          return logement.scrape === 'Fait' && logement.predit === 'Non';
+        case 'pending':
+          return logement.scrape === 'En attente';
+        default:
+          return true;
+      }
+    });
+
+    return {
+      data: {
+        ...response.data,
+        logements: filteredLogements,
+        totalItems: filteredLogements.length,
+        totalPages: Math.ceil(filteredLogements.length / (params.limit || 100))
+      }
+    };
+  } catch (error) {
+    console.error("Erreur lors de la récupération des logements par statut :", error);
+    throw error;
+  }
+};
+
+// Récupérer les logements depuis une vue Airtable spécifique
+export const getLogementsByView = async (viewName, params = {}) => {
+  try {
+    const {
+      page = 1,
+      limit = 100,
+      search = "",
+      sortBy = "",
+      sortOrder = "ASC",
+    } = params;
+
+    let allRecords = [];
+    let offset = "";
+
+    // Récupérer tous les enregistrements depuis la vue
+    do {
+      let airtableParams = {
+        pageSize: 100,
+        view: viewName, // Nom de la vue Airtable
+        ...(offset && { offset }),
+      };
+
+      const response = await airtableClient.get(`/${AIRTABLE_TABLE_NAME}`, {
+        params: airtableParams,
+      });
+
+      allRecords = [...allRecords, ...response.data.records];
+      offset = response.data.offset;
+    } while (offset);
+
+    // Appliquer la recherche côté client si nécessaire
+    let filteredRecords = search ? filterLogements(allRecords, search) : allRecords;
+
+    // Appliquer le tri côté client si nécessaire
+    let sortedRecords = sortBy ? sortLogements(filteredRecords, sortBy, sortOrder) : filteredRecords;
+
+    // Pagination côté client
+    const totalItems = sortedRecords.length;
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const paginatedRecords = sortedRecords.slice(start, end);
+
+    const transformedRecords = paginatedRecords.map((record) => ({
+      id: record.id,
+      idBeds24: record.fields["ID Beds24"] || "",
+      nom: record.fields["Nom"] || "",
+      ville: record.fields["Ville"] || "",
+      typologie: record.fields["Typologie"] || "",
+      latitude: record.fields["Latitude"] || 0,
+      longitude: record.fields["Logitude"] || 0,
+      adresse: record.fields["Adresse"] || "",
+      capacite: record.fields["Capacité"] || 0,
+      country: record.fields["country"] || "",
+      state: record.fields["state"] || "",
+      nbrLit: record.fields["Nbr_lit"] || 0,
+      tableScoringJournalier: record.fields["Logs_calcul"] || "",
+      roomType: record.fields["roomType"] || "",
+      nbrChambre: record.fields["Nbr_chambre"] || 0,
+      minStay: record.fields["minStay"] || 0,
+      maxStay: record.fields["maxStay"] || 0,
+      minPrice: record.fields["MinPrice"] || 0,
+      analyser: record.fields["analyser"] || "",
+      scrape: record.fields["Scrape"] || "En attente",
+      predit: record.fields["predit"] || "Non",
+      maxPrice: record.fields["MaxPrice"] || 0,
+      offset: record.fields["Offset"] * 100 || 0,
+      basePrice: record.fields["BasePrice"] || 0,
+      famille: record.fields["Famille"],
+      etat: record.fields["Etat"] || false,
+    }));
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      data: {
+        logements: transformedRecords,
+        totalItems,
+        totalPages,
+        currentPage: page,
+      },
+    };
+  } catch (error) {
+    console.error(`Erreur lors de la récupération depuis la vue ${viewName} :`, error);
+    throw error;
+  }
+};

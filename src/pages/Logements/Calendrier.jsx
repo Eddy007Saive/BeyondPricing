@@ -117,9 +117,9 @@ export function Calendrier() {
   };
 
   const getDataForDate = (date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = date.toLocaleDateString('en-CA');
     return scoringData.find(d => d.date === dateStr);
-  };
+};
 
   const generateMonthDays = () => {
     const year = currentDate.getFullYear();
