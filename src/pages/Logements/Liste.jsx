@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit3, Save, X, Filter, ArrowUpDown, MapPin, Home, Users, Bed, Eye, Settings, MoreHorizontal, CheckCircle, Clock, AlertCircle, Euro, Trash2, Edit, Power } from 'lucide-react';
-import { getLogements, updateLogement, deleteLogement ,getLogementsByView} from '@/services/Logement';
+import { getLogements, updateLogement, deleteLogement, getLogementsByView,runLogement } from '@/services/Logement';
 
 export const Liste = () => {
   const [logements, setLogements] = useState([]);
@@ -31,38 +31,38 @@ export const Liste = () => {
 
 
   const fetchLogements = async () => {
-  try {
-    setLoading(true);
-    const params = {
-      page: currentPage,
-      limit,
-      search: searchTerm,
-      sortBy,
-      sortOrder
-    };
+    try {
+      setLoading(true);
+      const params = {
+        page: currentPage,
+        limit,
+        search: searchTerm,
+        sortBy,
+        sortOrder
+      };
 
-    // Mapper les filtres vers les noms de vues Airtable
-    const viewMapping = {
-      'all': 'Grid view', // Vue par défaut
-      'actif': 'Logements Actifs', // Nom de votre vue dans Airtable
-      'inactif': 'Logements Inactifs',
-      'optimized': 'Logements Optimisés',
-      'analyzed': 'Logements Analysés',
-      'pending': 'En Attente'
-    };
+      // Mapper les filtres vers les noms de vues Airtable
+      const viewMapping = {
+        'all': 'Grid view', // Vue par défaut
+        'actif': 'Logements Actifs', // Nom de votre vue dans Airtable
+        'inactif': 'Logements Inactifs',
+        'optimized': 'Logements Optimisés',
+        'analyzed': 'Logements Analysés',
+        'pending': 'En Attente'
+      };
 
-    const viewName = viewMapping[filterStatus] || 'Grid view';
-    const response = await getLogementsByView(viewName, params);
+      const viewName = viewMapping[filterStatus] || 'Grid view';
+      const response = await getLogementsByView(viewName, params);
 
-    setLogements(response.data.logements);
-    setTotalPages(response.data.totalPages);
-    setTotalItems(response.data.totalItems);
-  } catch (error) {
-    console.error('Erreur lors du chargement:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+      setLogements(response.data.logements);
+      setTotalPages(response.data.totalPages);
+      setTotalItems(response.data.totalItems);
+    } catch (error) {
+      console.error('Erreur lors du chargement:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSort = (column) => {
     if (sortBy === column) {
@@ -77,6 +77,14 @@ export const Liste = () => {
     setEditingCell(`${logementId}-${field}`);
     setEditingValue(currentValue || '');
   };
+
+  const handleRunInstructions=async (logement)=>{
+    try {
+      const resp=await runLogement(logement.id);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const handleSaveCell = async (logementId, field) => {
     try {
@@ -327,18 +335,18 @@ export const Liste = () => {
                 >
                   <span className="relative z-10 flex items-center space-x-2">
                     <Filter className="w-4 h-4" />
-                      <div className="mt-4 flex items-center space-x-4">
-                <select
-                id="filter-status"
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-4 py-2 bg-bleu-fonce/50 border border-bleu-fonce-500/30 rounded-lg text-blanc-pur focus:outline-none focus:border-primary-500"
-                >
-                  <option value="all">Tous</option>
-                  <option value="actif">Actifs uniquement</option>
-                  <option value="inactif">Inactifs uniquement</option>
-                </select>
-              </div>
+                    <div className="mt-4 flex items-center space-x-4">
+                      <select
+                        id="filter-status"
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                        className="px-4 py-2 bg-bleu-fonce/50 border border-bleu-fonce-500/30 rounded-lg text-blanc-pur focus:outline-none focus:border-primary-500"
+                      >
+                        <option value="all">Tous</option>
+                        <option value="actif">Actifs uniquement</option>
+                        <option value="inactif">Inactifs uniquement</option>
+                      </select>
+                    </div>
                   </span>
                   <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity"></div>
                 </button>
@@ -375,7 +383,7 @@ export const Liste = () => {
             {showFilters && (
               <div className="mt-4 flex items-center space-x-4">
                 <select
-                id="filter-status"
+                  id="filter-status"
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                   className="px-4 py-2 bg-bleu-fonce/50 border border-primary-500/30 rounded-lg text-blanc-pur focus:outline-none focus:border-primary-500"
@@ -433,6 +441,8 @@ export const Liste = () => {
                       { key: 'maxPrice', label: 'Prix Max.' },
                       { key: 'offset', label: 'Offset' },
                       { key: 'actif', label: 'Actif' },
+                      { key: 'Run', label: 'Run' },
+                      { key: 'actions', label: 'Action' },
                     ].map((col, idx) => (
                       <th
                         key={col.key}
@@ -536,7 +546,28 @@ export const Liste = () => {
                         </button>
                       </td>
                       <td className="px-6 py-4">
-                        <EditableCell logement={logement} field="instructions" value={logement.instructions} className="text-blanc-pur/70 text-sm" />
+                        <button
+                          onClick={() => handleRunInstructions(logement)}
+                          disabled={!logement.etat}
+                          className={`relative group flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${logement.etat
+                              ? 'bg-blue-500/20 border border-blue-500/50 hover:bg-blue-500/30 cursor-pointer'
+                              : 'bg-gray-500/20 border border-gray-500/50 cursor-not-allowed opacity-50'
+                            }`}
+                        >
+                          <CheckCircle
+                            className={`w-4 h-4 transition-colors ${logement.etat ? 'text-blue-500' : 'text-gray-500'
+                              }`}
+                          />
+                          <span
+                            className={`text-sm font-bold ${logement.etat ? 'text-blue-500' : 'text-gray-500'
+                              }`}
+                          >
+                            Run
+                          </span>
+                          {logement.etat && (
+                            <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                          )}
+                        </button>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">

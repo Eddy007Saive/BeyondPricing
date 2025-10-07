@@ -40,6 +40,23 @@ export const createLogement = async (logementData) => {
   }
 };
 
+export const  runLogement = async (logementData) => {
+  try {
+    const response = await axios.post('https://n8n.srv903010.hstgr.cloud/webhook-test/run',{id:logementData});
+  } catch (error) {
+    console.error("Erreur lors de la création du logement :", error);
+    throw {
+      response: {
+        data: {
+          errors:
+            error.response?.data?.error?.message ||
+            "Erreur lors de la création du logement",
+        },
+      },
+    };
+  }
+};
+
 // Fonction de tri côté client
 const sortLogements = (logements, sortBy, sortOrder) => {
   if (!sortBy) return logements;
