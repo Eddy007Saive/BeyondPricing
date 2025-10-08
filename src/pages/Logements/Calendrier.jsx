@@ -197,7 +197,7 @@ export function Calendrier() {
     return <Cloud className="h-2 w-2 sm:h-3 sm:w-3 text-gray-400" />;
   };
 
-  const CalendarDay = ({ date, data, isCurrentMonth = true }) => {
+ const CalendarDay = ({ date, data, isCurrentMonth = true }) => {
     const isToday = date.toDateString() === new Date().toDateString();
     const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString();
     const isWeekend = [0, 6].includes(date.getDay());
@@ -222,8 +222,8 @@ export function Calendrier() {
     return (
       <div
         className={`
-          relative p-1 sm:p-2 min-h-[60px] sm:min-h-[90px] border border-primary-900/30 cursor-pointer 
-          transition-all duration-300 hover:scale-105
+          relative p-1 sm:p-2 min-h-[80px] sm:min-h-[120px] border border-primary-900/30 cursor-pointer 
+          transition-all duration-300 hover:scale-105 flex flex-col justify-between
           ${isCurrentMonth ? 'bg-bleu-fonce/40 backdrop-blur-sm' : 'bg-bleu-fonce/20'}
           ${isSelected ? 'ring-2 ring-bleu-neon bg-primary-900/50 shadow-neon-blue' : ''}
           ${isToday ? 'ring-2 ring-violet-plasma bg-secondary-900/50 shadow-neon-violet' : ''}
@@ -232,53 +232,53 @@ export function Calendrier() {
         `}
         onClick={() => setSelectedDate(date)}
       >
-        <div className={`text-[10px] sm:text-sm font-bold mb-0.5 sm:mb-1 ${isToday ? 'text-violet-plasma' :
-          isCurrentMonth ? 'text-bleu-neon' : 'text-gray-600'
-          }`}>
-          {date.getDate()}
-        </div>
-
-        {data && (
-          <div className="space-y-0.5 sm:space-y-1">
+        {/* EN HAUT : Date et Prix */}
+        <div className="flex items-start justify-between">
+          <div className={`text-[10px] sm:text-sm font-bold ${isToday ? 'text-violet-plasma' :
+            isCurrentMonth ? 'text-bleu-neon' : 'text-gray-600'
+            }`}>
+            {date.getDate()}
+          </div>
+          
+          {data && (
             <div className={`text-[9px] sm:text-xs font-bold ${getPriceColor(data.prix_applique, data.prix_calcule)}`}>
               {Math.round(data.prix_applique)}€
             </div>
+          )}
+        </div>
 
-            <div className="flex justify-center">
+        {/* AU CENTRE : Météo, Tension et Alertes */}
+        {data && (
+          <div className="flex-1 flex flex-col items-center justify-center space-y-1">
+            <div className="flex justify-center gap-1 sm:gap-2 items-center">
+              {getMeteoIcon(data.score_meteo)}
               <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${getTensionColor(data.tension_marche)} animate-pulse`}></div>
             </div>
-
-            <div className="flex justify-center gap-0.5 sm:gap-1">
-              {getMeteoIcon(data.score_meteo)}
+            
+            <div className="flex justify-center gap-1">
               {data.promo && <Star className="h-2 w-2 sm:h-3 sm:w-3 text-violet-plasma animate-pulse" />}
               {!data.action_push && <AlertCircle className="h-2 w-2 sm:h-3 sm:w-3 text-red-500" />}
+              {data?.intensite_evenement > 0 && (
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-bleu-neon to-violet-plasma rounded-full animate-pulse shadow-neon-gradient"></div>
+              )}
             </div>
           </div>
         )}
 
-    {/* Saison et Vacances */}
-{data?.M_details?.saison_nom && (
-  <div className="  rounded-xl p-3 backdrop-blur-sm  transition-all">
-    <div className="flex items-center gap-2 mb-2">
-      {getSaisonIcon(data.M_details.saison_nom)}
-    </div>
-    {data.M_details.vacances && (
-      <div className="mt-2 text-xs text-violet-plasma font-medium">
-        📅 {data.M_details.vacances}
-      </div>
-    )}
-  </div>
-)}
-
-        {data?.intensite_evenement > 0 && (
-          <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1">
-            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-bleu-neon to-violet-plasma rounded-full animate-pulse shadow-neon-gradient"></div>
-          </div>
-        )}
-
-        {data?.is_ferie && (
-          <div className="absolute bottom-0.5 left-0.5 sm:bottom-1 sm:left-1">
-            <div className="text-[8px] sm:text-[10px] bg-violet-plasma/20 text-violet-plasma px-1 rounded">F</div>
+        {/* EN BAS : Saison et Vacances */}
+        {data?.M_details?.saison_nom && (
+          <div className="flex items-center justify-between text-[8px] sm:text-[10px] gap-1">
+            <div className="flex items-center gap-0.5">
+              {getSaisonIcon(data.M_details.saison_nom)}
+            </div>
+            {data.M_details.vacances && (
+              <div className="text-violet-plasma font-medium truncate max-w-[80%]">
+                {data.M_details.vacances}
+              </div>
+            )}
+            {data?.is_ferie && (
+              <div className="bg-violet-plasma/20 text-violet-plasma px-1 rounded">F</div>
+            )}
           </div>
         )}
       </div>
