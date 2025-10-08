@@ -18,7 +18,10 @@ import {
   Star,
   Filter,
   Zap,
-  AlertCircle
+  AlertCircle,
+  Snowflake,    // ❄️ Hiver
+  Leaf,         
+  Flower2    
 } from "lucide-react";
 
 import { getScoringsByLogement } from '@/services/Scoring';
@@ -35,6 +38,16 @@ export function Calendrier() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [error, setError] = useState(null);
+  const getSaisonIcon = (saisonNom) => {
+    const saisonIcons = {
+      'hiver': <Snowflake className="h-4 w-4 text-blue-300" />,
+      'printemps': <Flower2 className="h-4 w-4 text-pink-400" />,
+      'été': <Sun className="h-4 w-4 text-yellow-400" />,
+      'automne': <Leaf className="h-4 w-4 text-orange-400" />
+    };
+
+    return saisonIcons[saisonNom.toLowerCase()] || <Sparkles className="h-4 w-4 text-violet-plasma" />;
+  };
 
   // Chargement des logements
   useEffect(() => {
@@ -242,6 +255,20 @@ export function Calendrier() {
             </div>
           </div>
         )}
+
+    {/* Saison et Vacances */}
+{data?.M_details?.saison_nom && (
+  <div className="  rounded-xl p-3 backdrop-blur-sm  transition-all">
+    <div className="flex items-center gap-2 mb-2">
+      {getSaisonIcon(data.M_details.saison_nom)}
+    </div>
+    {data.M_details.vacances && (
+      <div className="mt-2 text-xs text-violet-plasma font-medium">
+        📅 {data.M_details.vacances}
+      </div>
+    )}
+  </div>
+)}
 
         {data?.intensite_evenement > 0 && (
           <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1">
