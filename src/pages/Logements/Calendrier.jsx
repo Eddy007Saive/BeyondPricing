@@ -119,24 +119,44 @@ export function Calendrier() {
   const getDataForDate = (date) => {
     const dateStr = date.toLocaleDateString('en-CA');
     return scoringData.find(d => d.date === dateStr);
-};
+  };
 
   const generateMonthDays = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
+
+    // Premier jour du mois
     const firstDay = new Date(year, month, 1);
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    // Dernier jour du mois
+    const lastDay = new Date(year, month + 1, 0);
+
+    // Nombre de jours dans le mois
+    const daysInMonth = lastDay.getDate();
+
+    // Jour de la semaine du premier jour (0 = dimanche, 6 = samedi)
+    const firstDayOfWeek = firstDay.getDay();
 
     const days = [];
-    for (let i = 0; i < 42; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
+
+    // Ajouter des cellules vides avant le premier jour du mois
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      days.push(null); // null = cellule vide
+    }
+
+    // Ajouter tous les jours du mois
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
       days.push(date);
     }
+
+    // Ajouter des cellules vides après le dernier jour pour compléter la grille
+    const remainingCells = 42 - days.length; // 42 = 6 semaines max
+    for (let i = 0; i < remainingCells; i++) {
+      days.push(null);
+    }
+
     return days;
   };
-
   const generateWeekDays = () => {
     const startOfWeek = new Date(currentDate);
     const day = startOfWeek.getDay();
@@ -200,7 +220,7 @@ export function Calendrier() {
         onClick={() => setSelectedDate(date)}
       >
         <div className={`text-[10px] sm:text-sm font-bold mb-0.5 sm:mb-1 ${isToday ? 'text-violet-plasma' :
-            isCurrentMonth ? 'text-bleu-neon' : 'text-gray-600'
+          isCurrentMonth ? 'text-bleu-neon' : 'text-gray-600'
           }`}>
           {date.getDate()}
         </div>
@@ -406,8 +426,8 @@ export function Calendrier() {
 
             {/* Status push */}
             <div className={`rounded-xl p-3 border ${data.action_push
-                ? 'bg-bleu-neon/20 border-bleu-neon/30'
-                : 'bg-red-500/20 border-red-500/30'
+              ? 'bg-bleu-neon/20 border-bleu-neon/30'
+              : 'bg-red-500/20 border-red-500/30'
               }`}>
               <div className="flex items-center gap-2">
                 {data.action_push ? (
@@ -542,8 +562,8 @@ export function Calendrier() {
               <button
                 onClick={() => setViewMode('month')}
                 className={`px-3 sm:px-6 py-1.5 rounded text-[10px] sm:text-sm font-medium transition-all ${viewMode === 'month'
-                    ? 'bg-gradient-to-r from-bleu-neon/30 to-violet-plasma/30 text-bleu-neon shadow-neon-blue'
-                    : 'text-gray-400 hover:text-bleu-neon'
+                  ? 'bg-gradient-to-r from-bleu-neon/30 to-violet-plasma/30 text-bleu-neon shadow-neon-blue'
+                  : 'text-gray-400 hover:text-bleu-neon'
                   }`}
               >
                 MOIS
@@ -551,8 +571,8 @@ export function Calendrier() {
               <button
                 onClick={() => setViewMode('week')}
                 className={`px-3 sm:px-6 py-1.5 rounded text-[10px] sm:text-sm font-medium transition-all ${viewMode === 'week'
-                    ? 'bg-gradient-to-r from-bleu-neon/30 to-violet-plasma/30 text-violet-plasma shadow-neon-violet'
-                    : 'text-gray-400 hover:text-violet-plasma'
+                  ? 'bg-gradient-to-r from-bleu-neon/30 to-violet-plasma/30 text-violet-plasma shadow-neon-violet'
+                  : 'text-gray-400 hover:text-violet-plasma'
                   }`}
               >
                 SEMAINE
@@ -671,6 +691,16 @@ export function Calendrier() {
 
           <div className={`grid grid-cols-7 ${viewMode === 'week' ? 'grid-rows-1' : ''}`}>
             {days.map((date, index) => {
+              // Si la cellule est vide (null), afficher une cellule vide
+              if (date === null) {
+                return (
+                  <div
+                    key={index}
+                    className="relative p-1 sm:p-2 min-h-[60px] sm:min-h-[90px] border border-primary-900/10 bg-bleu-fonce/10"
+                  />
+                );
+              }
+
               const data = getDataForDate(date);
               const isCurrentMonth = viewMode === 'week' || date.getMonth() === currentDate.getMonth();
               return <CalendarDay key={index} date={date} data={data} isCurrentMonth={isCurrentMonth} />;
