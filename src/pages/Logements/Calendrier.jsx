@@ -20,8 +20,8 @@ import {
   Zap,
   AlertCircle,
   Snowflake,    // ❄️ Hiver
-  Leaf,         
-  Flower2    
+  Leaf,
+  Flower2
 } from "lucide-react";
 
 import { getScoringsByLogement } from '@/services/Scoring';
@@ -89,7 +89,9 @@ export function Calendrier() {
   // Chargement des données de scoring
   useEffect(() => {
     const loadScoringData = async () => {
+      console.log("ezseze", selectedLogement);
       if (!selectedLogement) return;
+
 
       try {
         setLoading(true);
@@ -192,22 +194,22 @@ export function Calendrier() {
   };
 
   const getMeteoIcon = (conditionMeteo) => {
-  if (!conditionMeteo || conditionMeteo === "inconnu") return <Cloud className="h-2 w-2 sm:h-3 sm:w-3 text-gray-400" />;
-  
-  // Mapper les conditions OpenWeather
-  const weatherIcons = {
-    'Clear': <Sun className="h-2 w-2 sm:h-3 sm:w-3 text-yellow-400" />,
-    'Clouds': <Cloud className="h-2 w-2 sm:h-3 sm:w-3 text-gray-400" />,
-    'Rain': <CloudRain className="h-2 w-2 sm:h-3 sm:w-3 text-blue-400" />,
-    'Drizzle': <CloudRain className="h-2 w-2 sm:h-3 sm:w-3 text-blue-300" />,
-    'Thunderstorm': <CloudRain className="h-2 w-2 sm:h-3 sm:w-3 text-purple-400" />,
-    'Snow': <Cloud className="h-2 w-2 sm:h-3 sm:w-3 text-white" />,
-  };
-  
-  return weatherIcons[conditionMeteo] || null;
-};
+    if (!conditionMeteo || conditionMeteo === "inconnu") return <Cloud className="h-2 w-2 sm:h-3 sm:w-3 text-gray-400" />;
 
- const CalendarDay = ({ date, data, isCurrentMonth = true }) => {
+    // Mapper les conditions OpenWeather
+    const weatherIcons = {
+      'Clear': <Sun className="h-2 w-2 sm:h-3 sm:w-3 text-yellow-400" />,
+      'Clouds': <Cloud className="h-2 w-2 sm:h-3 sm:w-3 text-gray-400" />,
+      'Rain': <CloudRain className="h-2 w-2 sm:h-3 sm:w-3 text-blue-400" />,
+      'Drizzle': <CloudRain className="h-2 w-2 sm:h-3 sm:w-3 text-blue-300" />,
+      'Thunderstorm': <CloudRain className="h-2 w-2 sm:h-3 sm:w-3 text-purple-400" />,
+      'Snow': <Cloud className="h-2 w-2 sm:h-3 sm:w-3 text-white" />,
+    };
+
+    return weatherIcons[conditionMeteo] || null;
+  };
+
+  const CalendarDay = ({ date, data, isCurrentMonth = true }) => {
     const isToday = date.toDateString() === new Date().toDateString();
     const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString();
     const isWeekend = [0, 6].includes(date.getDay());
@@ -249,7 +251,7 @@ export function Calendrier() {
             }`}>
             {date.getDate()}
           </div>
-          
+
           {data && (
             <div className={`text-[9px] sm:text-xs font-bold ${getPriceColor(data.prix_applique, data.prix_calcule)}`}>
               {Math.round(data.prix_applique)}€
@@ -264,7 +266,7 @@ export function Calendrier() {
               {getMeteoIcon(data.M_details.condition_meteo)}
               <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${getTensionColor(data.tension_marche)} animate-pulse`}></div>
             </div>
-            
+
             <div className="flex justify-center gap-1">
               {data.promo && <Star className="h-2 w-2 sm:h-3 sm:w-3 text-violet-plasma animate-pulse" />}
               {!data.action_push && <AlertCircle className="h-2 w-2 sm:h-3 sm:w-3 text-red-500" />}
@@ -620,16 +622,24 @@ export function Calendrier() {
           {showFilters && (
             <div className="mt-4">
               <select
-                value={selectedLogement}
-                onChange={(e) => setSelectedLogement(e.target.value)}
+                value={selectedLogement?.idBeds24 || ""}
+                onChange={(e) => {
+                  const selected = logements.find(l => l.idBeds24 == e.target.value);
+                  console.log(e.target.value,"logememnts");
+                  console.log(logements,"logememnts");
+
+                  
+                  setSelectedLogement(selected);
+                }}
                 className="w-full bg-bleu-fonce/60 border border-bleu-neon/30 rounded-lg px-3 py-2 text-sm text-bleu-neon backdrop-blur-sm focus:ring-2 focus:ring-bleu-neon focus:outline-none"
               >
                 {logements.map(logement => (
-                  <option key={logement.id} value={logement.idBeds24} className="bg-bleu-fonce text-bleu-neon">
+                  <option key={logement.id} value={logement.idBeds24}>
                     {logement.nom} - {logement.ville}
                   </option>
                 ))}
               </select>
+
             </div>
           )}
         </div>
