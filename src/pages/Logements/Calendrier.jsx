@@ -24,7 +24,7 @@ import {
   Flower2,
   Plus,
   Minus,
-  Check
+  Check, Home, Bed, UserCog2Icon
 } from "lucide-react";
 
 import { getScoringsByLogement } from '@/services/Scoring';
@@ -41,11 +41,12 @@ export function Calendrier() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [error, setError] = useState(null);
-  
-  // Nouveaux états pour la sélection multiple
+
+  // Nouveaux états pour la sélection multiple et onglets
   const [selectedDates, setSelectedDates] = useState([]);
   const [showPricePanel, setShowPricePanel] = useState(false);
   const [priceAdjustment, setPriceAdjustment] = useState(0);
+  const [activeTab, setActiveTab] = useState('calendrier');
 
   const getSaisonIcon = (saisonNom) => {
     const saisonIcons = {
@@ -181,9 +182,7 @@ export function Calendrier() {
   };
 
   const handleApplyPriceChange = () => {
-    // Ici tu peux implémenter la logique pour appliquer les changements de prix
     console.log("Ajustement de prix:", priceAdjustment, "% pour", selectedDates.length, "dates");
-    // TODO: Appeler l'API pour mettre à jour les prix
     alert(`Modification de ${priceAdjustment}% appliquée à ${selectedDates.length} dates`);
   };
 
@@ -194,14 +193,21 @@ export function Calendrier() {
   };
 
   const CalendarDay = ({ date, data, isCurrentMonth = true }) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const currentDate = new Date(date);
+    currentDate.setHours(0, 0, 0, 0);
+
     const isToday = date.toDateString() === new Date().toDateString();
+    const isPast = currentDate < today;
     const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString();
     const isMultiSelected = selectedDates.some(d => d.toDateString() === date.toDateString());
     const isWeekend = [0, 6].includes(date.getDay());
 
     const handleDayClick = (e) => {
+      if (isPast) return; // Empêcher la sélection des jours passés
+
       if (e.ctrlKey || e.metaKey || e.shiftKey) {
-        // Sélection multiple avec Ctrl/Cmd/Shift
         if (isMultiSelected) {
           setSelectedDates(selectedDates.filter(d => d.toDateString() !== date.toDateString()));
         } else {
@@ -209,7 +215,6 @@ export function Calendrier() {
         }
         setShowPricePanel(true);
       } else {
-        // Sélection simple
         setSelectedDate(date);
       }
     };
@@ -234,23 +239,27 @@ export function Calendrier() {
     return (
       <div
         className={`
-          relative p-1 sm:p-2 min-h-[80px] sm:min-h-[120px] border border-primary-900/30 cursor-pointer 
-          transition-all duration-300 hover:scale-105 flex flex-col justify-between
-          ${isCurrentMonth ? 'bg-bleu-fonce/40 backdrop-blur-sm' : 'bg-bleu-fonce/20'}
-          ${isSelected ? 'ring-2 ring-bleu-neon bg-primary-900/50 shadow-neon-blue' : ''}
-          ${isMultiSelected ? 'ring-4 ring-violet-plasma bg-violet-plasma/20 shadow-neon-violet' : ''}
-          ${isToday && !isMultiSelected ? 'ring-2 ring-violet-plasma bg-secondary-900/50 shadow-neon-violet' : ''}
-          ${isWeekend ? 'bg-gradient-to-br from-primary-950/30 to-secondary-950/30' : ''}
-          hover:shadow-neon-gradient hover:bg-bleu-fonce/60
-        `}
+        relative p-1 sm:p-2 min-h-[80px] sm:min-h-[120px] border border-primary-900/30 
+        transition-all duration-300 flex flex-col justify-between
+        ${isPast ? 'opacity-40 grayscale cursor-not-allowed' : 'cursor-pointer hover:scale-105 hover:shadow-neon-gradient hover:bg-bleu-fonce/60'}
+        ${isCurrentMonth ? 'bg-bleu-fonce/40 backdrop-blur-sm' : 'bg-bleu-fonce/20'}
+        ${isSelected && !isPast ? 'ring-2 ring-bleu-neon bg-primary-900/50 shadow-neon-blue' : ''}
+        ${isMultiSelected && !isPast ? 'ring-4 ring-violet-plasma bg-violet-plasma/20 shadow-neon-violet' : ''}
+        ${isToday && !isMultiSelected && !isPast ? 'ring-2 ring-violet-plasma bg-secondary-900/50 shadow-neon-violet' : ''}
+        ${isWeekend ? 'bg-gradient-to-br from-primary-950/30 to-secondary-950/30' : ''}
+      `}
         onClick={handleDayClick}
+        onMouseEnter={() => data && setShowTooltip(date)}
+        onMouseLeave={() => setShowTooltip(null)}
       >
         <div className="flex items-start justify-between">
-          <div className={`text-[10px] sm:text-sm font-bold flex items-center gap-1 ${
-            isToday ? 'text-violet-plasma' : isCurrentMonth ? 'text-bleu-neon' : 'text-gray-600'
-          }`}>
+          <div className={`text-[10px] sm:text-sm font-bold flex items-center gap-1 ${isPast ? 'text-gray-600' :
+              isToday ? 'text-violet-plasma' :
+                isCurrentMonth ? 'text-bleu-neon' :
+                  'text-gray-600'
+            }`}>
             {date.getDate()}
-            {isMultiSelected && <Check className="h-3 w-3 text-violet-plasma" />}
+            {isMultiSelected && !isPast && <Check className="h-3 w-3 text-violet-plasma" />}
           </div>
           {data && (
             <div className={`text-[9px] sm:text-xs font-bold ${getPriceColor(data.prix_applique, data.prix_calcule)}`}>
@@ -263,13 +272,13 @@ export function Calendrier() {
           <div className="flex-1 flex flex-col items-center justify-center space-y-1">
             <div className="flex justify-center gap-1 sm:gap-2 items-center">
               {getMeteoIcon(data.M_details.condition_meteo)}
-              <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${getTensionColor(data.tension_marche)} animate-pulse`}></div>
+              <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${getTensionColor(data.tension_marche)} ${!isPast && 'animate-pulse'}`}></div>
             </div>
             <div className="flex justify-center gap-1">
-              {data.promo && <Star className="h-2 w-2 sm:h-3 sm:w-3 text-violet-plasma animate-pulse" />}
+              {data.promo && <Star className={`h-2 w-2 sm:h-3 sm:w-3 text-violet-plasma ${!isPast && 'animate-pulse'}`} />}
               {!data.action_push && <AlertCircle className="h-2 w-2 sm:h-3 sm:w-3 text-red-500" />}
               {data?.intensite_evenement > 0 && (
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-bleu-neon to-violet-plasma rounded-full animate-pulse shadow-neon-gradient"></div>
+                <div className={`w-1.5 h-1.5 sm:w-2 sm:w-2 bg-gradient-to-r from-bleu-neon to-violet-plasma rounded-full shadow-neon-gradient ${!isPast && 'animate-pulse'}`}></div>
               )}
             </div>
           </div>
@@ -290,9 +299,88 @@ export function Calendrier() {
             )}
           </div>
         )}
+
+        {/* Tooltip au survol */}
+        {showTooltip?.toDateString() === date.toDateString() && data && (
+          <div className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 z-9999 pointer-events-none">
+            <div className="bg-gradient-to-br from-bleu-fonce to-noir-absolu border-2 border-bleu-neon/40 rounded-xl shadow-2xl p-3 min-w-[220px] backdrop-blur-xl">
+              <div className="text-xs font-bold text-bleu-neon mb-2 border-b border-bleu-neon/30 pb-2">
+                {date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </div>
+
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Prix:</span>
+                  <span className="font-bold text-bleu-neon">{Math.round(data.prix_applique)}€</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Tension marché:</span>
+                  <div className="flex items-center gap-1">
+                    <div className={`w-2 h-2 rounded-full ${getTensionColor(data.tension_marche)}`}></div>
+                    <span className="text-blanc-pur font-medium">{data.tension_marche}</span>
+                  </div>
+                </div>
+
+                {data.M_details?.saison_nom && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Saison:</span>
+                    <div className="flex items-center gap-1">
+                      {getSaisonIcon(data.M_details.saison_nom)}
+                      <span className="text-blanc-pur">{data.M_details.saison_nom}</span>
+                    </div>
+                  </div>
+                )}
+
+                {data.M_details?.vacances && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Vacances:</span>
+                    <span className="text-violet-plasma font-medium">{data.M_details.vacances}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Score IA:</span>
+                  <span className="text-violet-plasma font-bold">{Math.round(data.S_base * 100)}%</span>
+                </div>
+
+                {data.M_details?.condition_meteo && data.M_details.condition_meteo !== "inconnu" && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Météo:</span>
+                    <div className="flex items-center gap-1">
+                      {getMeteoIcon(data.M_details.condition_meteo)}
+                      <span className="text-blanc-pur">{data.M_details.condition_meteo}</span>
+                    </div>
+                  </div>
+                )}
+
+                {data.is_ferie && (
+                  <div className="text-center py-1 px-2 bg-violet-plasma/20 rounded text-violet-plasma font-bold">
+                    Jour Férié
+                  </div>
+                )}
+
+                {data.promo && (
+                  <div className="text-center py-1 px-2 bg-bleu-neon/20 rounded text-bleu-neon font-bold flex items-center justify-center gap-1">
+                    <Star className="h-3 w-3" />
+                    Promotion Active
+                  </div>
+                )}
+              </div>
+
+              {/* Flèche du tooltip */}
+              <div className="absolute left-1/2 top-full -translate-x-1/2 -mt-1">
+                <div className="w-3 h-3 bg-bleu-fonce border-r-2 border-b-2 border-bleu-neon/40 transform rotate-45"></div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     );
   };
+
+  const [showTooltip, setShowTooltip] = useState(null);
 
   // Panneau d'ajustement des prix
   const PriceAdjustmentPanel = () => {
@@ -310,7 +398,7 @@ export function Calendrier() {
     const newAvgPrice = avgPrice * (1 + priceAdjustment / 100);
 
     return (
-      <div className="fixed right-0 top-0 h-full w-96 bg-gradient-to-br from-bleu-fonce to-noir-absolu border-l-2 border-bleu-neon/30 shadow-neon-gradient z-50 overflow-y-auto">
+      <div className="fixed right-0 top-0 h-full w-full sm:w-96 bg-gradient-to-br from-bleu-fonce to-noir-absolu border-l-2 border-bleu-neon/30 shadow-neon-gradient z-50 overflow-y-auto">
         <div className="sticky top-0 bg-gradient-to-r from-bleu-neon/10 to-violet-plasma/10 backdrop-blur-md border-b border-bleu-neon/30 p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-bleu-neon to-violet-plasma">
@@ -332,7 +420,7 @@ export function Calendrier() {
           {/* Contrôle d'ajustement */}
           <div className="bg-bleu-fonce/60 border border-bleu-neon/30 rounded-xl p-4">
             <div className="text-sm font-bold text-bleu-neon mb-3">Modifier le prix</div>
-            
+
             <div className="flex items-center gap-3 mb-4">
               <button
                 onClick={() => setPriceAdjustment(Math.max(-50, priceAdjustment - 5))}
@@ -340,7 +428,7 @@ export function Calendrier() {
               >
                 <Minus className="h-5 w-5 text-violet-plasma" />
               </button>
-              
+
               <div className="flex-1 text-center">
                 <input
                   type="number"
@@ -350,7 +438,7 @@ export function Calendrier() {
                 />
                 <div className="text-xs text-gray-400 mt-1">Pourcentage (%)</div>
               </div>
-              
+
               <button
                 onClick={() => setPriceAdjustment(Math.min(100, priceAdjustment + 5))}
                 className="p-3 bg-bleu-neon/20 hover:bg-bleu-neon/30 rounded-lg border border-bleu-neon/30 transition-all"
@@ -522,143 +610,200 @@ export function Calendrier() {
     );
   };
 
-  const days = viewMode === 'month' ? generateMonthDays() : generateWeekDays();
-  const selectedData = selectedDate ? getDataForDate(selectedDate) : null;
-  const selectedLogementInfo = getSelectedLogementInfo();
+  // Onglet Paramètres
+  const ParametresTab = () => {
+    const selectedLogementInfo = getSelectedLogementInfo();
 
-  if (loading && !scoringData.length) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-bleu-fonce via-noir-absolu to-bleu-fonce">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bleu-neon mx-auto mb-4"></div>
-          <span className="text-bleu-neon font-medium">Chargement des données...</span>
+      <div className="p-4 space-y-4 max-w-6xl mx-auto">
+        {/* Sélection du logement */}
+        <div className="bg-bleu-fonce/40 backdrop-blur-sm border border-bleu-neon/30 rounded-xl p-6">
+          <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-bleu-neon to-violet-plasma mb-4">
+            Sélection du Logement
+          </h3>
+          <select
+            value={selectedLogement?.idBeds24 || ""}
+            onChange={(e) => {
+              const selected = logements.find(l => l.idBeds24 == e.target.value);
+              setSelectedLogement(selected);
+            }}
+            className="w-full bg-bleu-fonce/60 border border-bleu-neon/30 rounded-lg px-4 py-3 text-bleu-neon backdrop-blur-sm focus:ring-2 focus:ring-bleu-neon focus:outline-none"
+          >
+            {logements.map(logement => (
+              <option key={logement.id} value={logement.idBeds24}>
+                {logement.nom} - {logement.ville}
+              </option>
+            ))}
+          </select>
         </div>
-      </div>
-    );
-  }
 
-  if (error) {
-    return (
-      <div className="flex flex-col justify-center items-center h-screen text-center bg-gradient-to-br from-bleu-fonce via-noir-absolu to-bleu-fonce p-4">
-        <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
-        <div className="text-red-400 text-lg font-semibold mb-2">{error}</div>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-6 py-3 bg-gradient-to-r from-bleu-neon to-violet-plasma text-blanc-pur rounded-lg hover:shadow-neon-gradient transition-all font-bold"
-        >
-          Réessayer
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-bleu-fonce via-noir-absolu to-bleu-fonce">
-      <div className="sticky top-0 z-40 bg-gradient-to-r from-bleu-neon/10 to-violet-plasma/10 backdrop-blur-xl border-b border-bleu-neon/20 shadow-neon-gradient">
-        <div className="px-2 sm:px-4 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <button
-                onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="p-2 hover:bg-bleu-neon/20 rounded-lg transition-all sm:hidden border border-bleu-neon/30"
-              >
-                <Menu className="h-4 w-4 text-bleu-neon" />
-              </button>
-              <div>
-                <h1 className="text-sm sm:text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-bleu-neon to-violet-plasma">
-                  Calendrier IA
-                </h1>
-                <div className="text-[10px] sm:text-xs text-bleu-neon/70 truncate max-w-[120px] sm:max-w-none flex items-center gap-1">
-                  <Zap className="h-3 w-3" />
-                  {selectedLogementInfo?.nom}
+        {/* Informations du logement */}
+        {selectedLogementInfo && (
+          <>
+            <div className="bg-gradient-to-r from-bleu-neon/20 to-violet-plasma/20 border border-bleu-neon/30 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-bleu-neon to-violet-plasma mb-4">
+                Informations Générales
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="bg-bleu-fonce/40 rounded-lg p-4">
+                  <div className="text-xs text-bleu-neon/70 mb-1">Nom</div>
+                  <div className="font-bold text-blanc-pur">{selectedLogementInfo.nom}</div>
+                </div>
+                <div className="bg-bleu-fonce/40 rounded-lg p-4">
+                  <div className="text-xs text-violet-plasma/70 mb-1">Ville</div>
+                  <div className="font-bold text-blanc-pur">{selectedLogementInfo.ville}</div>
+                </div>
+                <div className="bg-bleu-fonce/40 rounded-lg p-4">
+                  <div className="text-xs text-bleu-neon/70 mb-1">Type</div>
+                  <div className="font-bold text-blanc-pur">{selectedLogementInfo.typologie}</div>
+                </div>
+                <div className="bg-bleu-fonce/40 rounded-lg p-4">
+                  <div className="text-xs text-violet-plasma/70 mb-1">Capacité</div>
+                  <div className="font-bold text-blanc-pur">{selectedLogementInfo.capacite} personnes</div>
+                </div>
+                <div className="bg-bleu-fonce/40 rounded-lg p-4">
+                  <div className="text-xs text-bleu-neon/70 mb-1">Chambres</div>
+                  <div className="font-bold text-blanc-pur">{selectedLogementInfo.nbrChambre}</div>
+                </div>
+                <div className="bg-bleu-fonce/40 rounded-lg p-4">
+                  <div className="text-xs text-violet-plasma/70 mb-1">Superficie</div>
+                  <div className="font-bold text-blanc-pur">{selectedLogementInfo.superficie} m²</div>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              {selectedDates.length > 0 && (
-                <div className="bg-violet-plasma/20 border border-violet-plasma/30 rounded-lg px-3 py-1 text-xs font-bold text-violet-plasma">
-                  {selectedDates.length} date{selectedDates.length > 1 ? 's' : ''}
+            {/* Tarification */}
+            <div className="bg-bleu-fonce/40 backdrop-blur-sm border border-violet-plasma/30 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-bleu-neon to-violet-plasma mb-4 flex items-center gap-2">
+                <Euro className="h-5 w-5 text-violet-plasma" />
+                Tarification
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gradient-to-br from-bleu-neon/10 to-transparent rounded-lg p-4 border border-bleu-neon/30">
+                  <div className="text-xs text-bleu-neon/70 mb-1">Prix de base</div>
+                  <div className="text-2xl font-bold text-bleu-neon">{selectedLogementInfo.basePrice}€</div>
                 </div>
-              )}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="p-2 hover:bg-violet-plasma/20 rounded-lg transition-all border border-violet-plasma/30"
-              >
-                <Filter className="h-4 w-4 text-violet-plasma" />
-              </button>
+                <div className="bg-gradient-to-br from-violet-plasma/10 to-transparent rounded-lg p-4 border border-violet-plasma/30">
+                  <div className="text-xs text-violet-plasma/70 mb-1">Prix minimum</div>
+                  <div className="text-2xl font-bold text-violet-plasma">{selectedLogementInfo.minPrice}€</div>
+                </div>
+                <div className="bg-gradient-to-br from-bleu-neon/10 to-violet-plasma/10 rounded-lg p-4 border border-bleu-neon/20">
+                  <div className="text-xs text-gray-300 mb-1">Prix maximum</div>
+                  <div className="text-2xl font-bold text-blanc-pur">{selectedLogementInfo.maxPrice}€</div>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center justify-between mt-3">
-            <button
-              onClick={() => viewMode === 'month' ? navigateMonth(-1) : navigateWeek(-1)}
-              className="p-2 hover:bg-bleu-neon/20 rounded-lg transition-all border border-bleu-neon/30 hover:shadow-neon-blue"
-            >
-              <ChevronLeft className="h-4 w-4 text-bleu-neon" />
-            </button>
-
-            <h2 className="text-xs sm:text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-bleu-neon to-violet-plasma">
-              {viewMode === 'month'
-                ? currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }).toUpperCase()
-                : `SEMAINE ${currentDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`
-              }
-            </h2>
-
-            <button
-              onClick={() => viewMode === 'month' ? navigateMonth(1) : navigateWeek(1)}
-              className="p-2 hover:bg-violet-plasma/20 rounded-lg transition-all border border-violet-plasma/30 hover:shadow-neon-violet"
-            >
-              <ChevronRight className="h-4 w-4 text-violet-plasma" />
-            </button>
-          </div>
-
-          <div className="flex justify-center mt-3">
-            <div className="flex bg-bleu-fonce/40 border border-bleu-neon/20 rounded-lg p-1 backdrop-blur-sm">
-              <button
-                onClick={() => setViewMode('month')}
-                className={`px-3 sm:px-6 py-1.5 rounded text-[10px] sm:text-sm font-medium transition-all ${viewMode === 'month'
-                  ? 'bg-gradient-to-r from-bleu-neon/30 to-violet-plasma/30 text-bleu-neon shadow-neon-blue'
-                  : 'text-gray-400 hover:text-bleu-neon'
-                  }`}
-              >
-                MOIS
-              </button>
-              <button
-                onClick={() => setViewMode('week')}
-                className={`px-3 sm:px-6 py-1.5 rounded text-[10px] sm:text-sm font-medium transition-all ${viewMode === 'week'
-                  ? 'bg-gradient-to-r from-bleu-neon/30 to-violet-plasma/30 text-violet-plasma shadow-neon-violet'
-                  : 'text-gray-400 hover:text-violet-plasma'
-                  }`}
-              >
-                SEMAINE
-              </button>
+            {/* Localisation */}
+            <div className="bg-bleu-fonce/40 backdrop-blur-sm border border-bleu-neon/30 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-bleu-neon to-violet-plasma mb-4 flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-bleu-neon" />
+                Localisation
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-bleu-fonce/40 rounded-lg p-4">
+                  <div className="text-xs text-bleu-neon/70 mb-1">Adresse</div>
+                  <div className="font-medium text-blanc-pur">{selectedLogementInfo.adresse}</div>
+                </div>
+                <div className="bg-bleu-fonce/40 rounded-lg p-4">
+                  <div className="text-xs text-violet-plasma/70 mb-1">Code Postal</div>
+                  <div className="font-medium text-blanc-pur">{selectedLogementInfo.codePostal}</div>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {showFilters && (
-            <div className="mt-4">
-              <select
-                value={selectedLogement?.idBeds24 || ""}
-                onChange={(e) => {
-                  const selected = logements.find(l => l.idBeds24 == e.target.value);
-                  setSelectedLogement(selected);
-                }}
-                className="w-full bg-bleu-fonce/60 border border-bleu-neon/30 rounded-lg px-3 py-2 text-sm text-bleu-neon backdrop-blur-sm focus:ring-2 focus:ring-bleu-neon focus:outline-none"
-              >
-                {logements.map(logement => (
-                  <option key={logement.id} value={logement.idBeds24}>
-                    {logement.nom} - {logement.ville}
-                  </option>
-                ))}
-              </select>
+            {/* Statistiques */}
+            <div className="bg-gradient-to-r from-bleu-neon/10 to-violet-plasma/10 border border-bleu-neon/30 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-bleu-neon to-violet-plasma mb-4 flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-bleu-neon" />
+                Statistiques
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-bleu-fonce/60 rounded-lg p-4 text-center">
+                  <div className="text-xs text-bleu-neon/70 mb-2">Jours avec données</div>
+                  <div className="text-3xl font-bold text-bleu-neon">{scoringData.length}</div>
+                </div>
+                <div className="bg-bleu-fonce/60 rounded-lg p-4 text-center">
+                  <div className="text-xs text-violet-plasma/70 mb-2">Prix moyen</div>
+                  <div className="text-3xl font-bold text-violet-plasma">
+                    {scoringData.length > 0 ? Math.round(scoringData.reduce((acc, d) => acc + d.prix_applique, 0) / scoringData.length) : 0}€
+                  </div>
+                </div>
+                <div className="bg-bleu-fonce/60 rounded-lg p-4 text-center">
+                  <div className="text-xs text-bleu-neon/70 mb-2">Score IA moyen</div>
+                  <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-bleu-neon to-violet-plasma">
+                    {scoringData.length > 0 ? Math.round(scoringData.reduce((acc, d) => acc + d.S_base, 0) / scoringData.length * 100) : 0}%
+                  </div>
+                </div>
+                <div className="bg-bleu-fonce/60 rounded-lg p-4 text-center">
+                  <div className="text-xs text-violet-plasma/70 mb-2">Promos actives</div>
+                  <div className="text-3xl font-bold text-violet-plasma">
+                    {scoringData.filter(d => d.promo).length}
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
+    );
+  };
 
-      <div className="p-1 sm:p-4">
-        {/* Instruction pour sélection multiple */}
+  // Onglet Calendrier
+  const CalendrierTab = () => {
+    const days = viewMode === 'month' ? generateMonthDays() : generateWeekDays();
+
+    return (
+      <div className="p-2 sm:p-4">
+        {/* Navigation et contrôles */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={() => viewMode === 'month' ? navigateMonth(-1) : navigateWeek(-1)}
+            className="p-2 hover:bg-bleu-neon/20 rounded-lg transition-all border border-bleu-neon/30 hover:shadow-neon-blue"
+          >
+            <ChevronLeft className="h-5 w-5 text-bleu-neon" />
+          </button>
+
+          <h2 className="text-sm sm:text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-bleu-neon to-violet-plasma">
+            {viewMode === 'month'
+              ? currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }).toUpperCase()
+              : `SEMAINE ${currentDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`
+            }
+          </h2>
+
+          <button
+            onClick={() => viewMode === 'month' ? navigateMonth(1) : navigateWeek(1)}
+            className="p-2 hover:bg-violet-plasma/20 rounded-lg transition-all border border-violet-plasma/30 hover:shadow-neon-violet"
+          >
+            <ChevronRight className="h-5 w-5 text-violet-plasma" />
+          </button>
+        </div>
+
+        {/* Toggle Vue */}
+        <div className="flex justify-center mb-4">
+          <div className="flex bg-bleu-fonce/40 border border-bleu-neon/20 rounded-lg p-1 backdrop-blur-sm">
+            <button
+              onClick={() => setViewMode('month')}
+              className={`px-4 sm:px-8 py-2 rounded text-xs sm:text-sm font-medium transition-all ${viewMode === 'month'
+                ? 'bg-gradient-to-r from-bleu-neon/30 to-violet-plasma/30 text-bleu-neon shadow-neon-blue'
+                : 'text-gray-400 hover:text-bleu-neon'
+                }`}
+            >
+              MOIS
+            </button>
+            <button
+              onClick={() => setViewMode('week')}
+              className={`px-4 sm:px-8 py-2 rounded text-xs sm:text-sm font-medium transition-all ${viewMode === 'week'
+                ? 'bg-gradient-to-r from-bleu-neon/30 to-violet-plasma/30 text-violet-plasma shadow-neon-violet'
+                : 'text-gray-400 hover:text-violet-plasma'
+                }`}
+            >
+              SEMAINE
+            </button>
+          </div>
+        </div>
+
+        {/* Légende */}
         <div className="bg-bleu-fonce/40 backdrop-blur-sm border border-bleu-neon/20 rounded-xl p-3 mb-4">
           <div className="flex items-center justify-between text-[10px] sm:text-xs flex-wrap gap-2">
             <div className="flex items-center gap-3">
@@ -710,7 +855,7 @@ export function Calendrier() {
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="bg-bleu-fonce/40 backdrop-blur-sm border border-bleu-neon/30 rounded-xl p-4 hover:shadow-neon-blue transition-all">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-bleu-neon/20 rounded-lg border border-bleu-neon/30">
@@ -753,47 +898,189 @@ export function Calendrier() {
             </div>
           </div>
         </div>
+      </div>
+    );
+  };
 
-        {/* Infos logement */}
-        {selectedLogementInfo && (
-          <div className="bg-bleu-fonce/40 backdrop-blur-sm border border-violet-plasma/30 rounded-xl p-4">
-            <h3 className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-bleu-neon to-violet-plasma mb-3">
-              LOGEMENT ACTUEL
-            </h3>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <span className="text-bleu-neon/70">Type:</span>
-                <div className="font-medium text-blanc-pur">{selectedLogementInfo.typologie}</div>
+  const days = viewMode === 'month' ? generateMonthDays() : generateWeekDays();
+  const selectedData = selectedDate ? getDataForDate(selectedDate) : null;
+  const selectedLogementInfo = getSelectedLogementInfo();
+
+  if (loading && !scoringData.length) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-bleu-fonce via-noir-absolu to-bleu-fonce">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bleu-neon mx-auto mb-4"></div>
+          <span className="text-bleu-neon font-medium">Chargement des données...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen text-center bg-gradient-to-br from-bleu-fonce via-noir-absolu to-bleu-fonce p-4">
+        <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+        <div className="text-red-400 text-lg font-semibold mb-2">{error}</div>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-6 py-3 bg-gradient-to-r from-bleu-neon to-violet-plasma text-blanc-pur rounded-lg hover:shadow-neon-gradient transition-all font-bold"
+        >
+          Réessayer
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-bleu-fonce via-noir-absolu to-bleu-fonce">
+      {/* Header compact */}
+      <div className="sticky top-0 z-40 bg-gradient-to-r from-bleu-neon/10 to-violet-plasma/10 backdrop-blur-xl border-b border-bleu-neon/20 shadow-neon-gradient">
+        {/* Ligne du haut: Titre + Actions */}
+        <div className="px-3 sm:px-6 py-2 sm:py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="p-2 hover:bg-bleu-neon/20 rounded-lg transition-all lg:hidden border border-bleu-neon/30"
+              >
+                <Menu className="h-4 w-4 text-bleu-neon" />
+              </button>
+
+
+              <div className="space-y-1">
+                {/* Nom du logement */}
+                <h1 className="text-base sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-bleu-neon to-violet-plasma">
+                  {selectedLogement.nom}
+                </h1>
+
+                {/* Adresse */}
+                <p className="text-sm sm:text-base text-gray-300 truncate max-w-[250px] sm:max-w-full">
+                  {selectedLogement.adresse}
+                </p>
+
+                {/* Infos principales avec icônes */}
+                <div className="flex flex-wrap gap-2 items-center text-[10px] sm:text-xs text-bleu-neon/70">
+                  {/* Type de logement */}
+                  {selectedLogementInfo?.nom && (
+                    <div className="flex items-center gap-1">
+                      <Zap className="h-3 w-3" />
+                      {selectedLogementInfo.nom}
+                    </div>
+                  )}
+
+                  {/* Famille */}
+                  {selectedLogement.famille && (
+                    <div className="flex items-center gap-1">
+                      <Home className="h-3 w-3" />
+                      {selectedLogement.famille}
+                    </div>
+                  )}
+
+                  {/* Nombre de chambres */}
+                  {selectedLogement.chambres && (
+                    <div className="flex items-center gap-1">
+                      <Bed className="h-3 w-3" />
+                      {selectedLogement.chambres} chambre{selectedLogement.chambres > 1 ? "s" : ""}
+                    </div>
+                  )}
+
+                  {/* Nombre de personnes */}
+                  {selectedLogement.personnes && (
+                    <div className="flex items-center gap-1">
+                      <UserCog2Icon className="h-3 w-3" />
+                      {selectedLogement.personnes} personne{selectedLogement.personnes > 1 ? "s" : ""}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <span className="text-violet-plasma/70">Capacité:</span>
-                <div className="font-medium text-blanc-pur">{selectedLogementInfo.capacite} pers.</div>
-              </div>
-              <div>
-                <span className="text-bleu-neon/70">Chambres:</span>
-                <div className="font-medium text-blanc-pur">{selectedLogementInfo.nbrChambre}</div>
-              </div>
-              <div>
-                <span className="text-violet-plasma/70">Prix min:</span>
-                <div className="font-medium text-blanc-pur">{selectedLogementInfo.minPrice}€</div>
-              </div>
+
             </div>
+
+            <div className="flex items-center gap-2">
+              {selectedDates.length > 0 && (
+                <div className="bg-violet-plasma/20 border border-violet-plasma/30 rounded-lg px-2 sm:px-3 py-1 text-xs font-bold text-violet-plasma">
+                  {selectedDates.length}
+                </div>
+              )}
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="p-2 hover:bg-violet-plasma/20 rounded-lg transition-all border border-violet-plasma/30"
+              >
+                <Filter className="h-4 w-4 text-violet-plasma" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Onglets */}
+        <div className="border-t border-bleu-neon/10">
+          <div className="px-3 sm:px-6">
+            <div className="flex gap-1 sm:gap-2 overflow-x-auto">
+              <button
+                onClick={() => setActiveTab('calendrier')}
+                className={`px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${activeTab === 'calendrier'
+                  ? 'text-bleu-neon border-b-2 border-bleu-neon bg-bleu-neon/10'
+                  : 'text-gray-400 hover:text-bleu-neon border-b-2 border-transparent'
+                  }`}
+              >
+                <Calendar className="h-4 w-4" />
+                <span className="hidden sm:inline">Calendrier</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('parametres')}
+                className={`px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${activeTab === 'parametres'
+                  ? 'text-violet-plasma border-b-2 border-violet-plasma bg-violet-plasma/10'
+                  : 'text-gray-400 hover:text-violet-plasma border-b-2 border-transparent'
+                  }`}
+              >
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">Paramètres</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtres (si affichés) */}
+        {showFilters && (
+          <div className="border-t border-bleu-neon/10 px-3 sm:px-6 py-3">
+            <select
+              value={selectedLogement?.idBeds24 || ""}
+              onChange={(e) => {
+                const selected = logements.find(l => l.idBeds24 == e.target.value);
+                setSelectedLogement(selected);
+              }}
+              className="w-full bg-bleu-fonce/60 border border-bleu-neon/30 rounded-lg px-3 py-2 text-sm text-bleu-neon backdrop-blur-sm focus:ring-2 focus:ring-bleu-neon focus:outline-none"
+            >
+              {logements.map(logement => (
+                <option key={logement.id} value={logement.idBeds24}>
+                  {logement.nom} - {logement.ville}
+                </option>
+              ))}
+            </select>
           </div>
         )}
       </div>
 
+      {/* Contenu selon l'onglet */}
+      {activeTab === 'calendrier' ? <CalendrierTab /> : <ParametresTab />}
+
+      {/* Panels et modales */}
       {selectedDate && selectedData && (
         <MobileDetailPanel date={selectedDate} data={selectedData} />
       )}
 
       <PriceAdjustmentPanel />
 
-      <button
-        onClick={() => setCurrentDate(new Date())}
-        className="fixed bottom-6 right-6 p-4 bg-gradient-to-r from-bleu-neon to-violet-plasma rounded-full shadow-neon-gradient hover:scale-110 transition-all border-2 border-bleu-neon/30 z-40"
-      >
-        <Calendar className="h-6 w-6 text-blanc-pur" />
-      </button>
+      {/* Bouton retour aujourd'hui */}
+      {activeTab === 'calendrier' && (
+        <button
+          onClick={() => setCurrentDate(new Date())}
+          className="fixed bottom-6 right-6 p-3 sm:p-4 bg-gradient-to-r from-bleu-neon to-violet-plasma rounded-full shadow-neon-gradient hover:scale-110 transition-all border-2 border-bleu-neon/30 z-40"
+        >
+          <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-blanc-pur" />
+        </button>
+      )}
     </div>
   );
 }
